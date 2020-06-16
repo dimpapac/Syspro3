@@ -856,7 +856,7 @@ int dirCounty(char *countryDir, list_node **head, bucket **diseaseHashTable, buc
 			}
 		}
 			
-		write_stats(diseaseHashTable, diseaseHashNum, de->d_name, country, fifosW);
+		// write_stats(diseaseHashTable, diseaseHashNum, de->d_name, country, fifosW);
     }
  	
  // 	//write -15 indication that i finished with stats

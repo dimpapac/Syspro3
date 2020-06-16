@@ -160,11 +160,26 @@ int main(int argc, char *argv[])
 	}
 
 	//write -15 indication that i finished with stats
- 	int end = -15;
-	if (write(fifosW, &end, sizeof(int)) == -1){ 
-		perror("write");
-		// return -1;
-	}
+ // 	int end = -15;
+	// if (write(fifosW, &end, sizeof(int)) == -1){ 
+	// 	perror("write");
+	// 	// return -1;
+	// }
+
+	char *serverIP;
+	int serverPort = 0;
+	size = 0;
+	int retVal = read(fifosR, &size, sizeof(int));
+  	// printf("retVal %d\n", retVal);
+	serverIP = malloc(size * sizeof(char) + 1);
+	bytesread = read(fifosR, serverIP, size);
+	// printf("bytesread %d\n", bytesread);
+    serverIP[size] = '\0';
+   	read(fifosR, &serverPort, sizeof(int));
+    printf("Received: %s --- %d ----  bytesread: %d\n", serverIP, serverPort, bytesread);
+
+    // printf("Received: %s  ----  bytesread: %d -----pid: %d\n", buffer, bytesread, getpid());
+
 
 
 	/* blocking pipe*/

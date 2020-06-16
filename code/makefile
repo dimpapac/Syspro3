@@ -1,8 +1,8 @@
 CFLAGS	= -g3 -Wall
-EXEC	= diseaseAggregator
+EXEC	= master
 CEXEC   = Worker
 
-OBJS	= diseaseAggregator.o functions1.o heap.o rbt.o list.o functions.o
+OBJS	= master.o functions1.o heap.o rbt.o list.o functions.o
 COBJS	= Worker.o functions1.o heap.o rbt.o list.o functions.o
 
 .PHONY : all clean run
@@ -15,9 +15,9 @@ clean:
 	rm -f $(OBJS) $(EXEC) $(COBJS) $(CEXEC)
 
 run: $(EXEC) $(CEXEC)
-	./diseaseAggregator -w 3 -b 256 -i input_dir
+	./master -w 4 -b 256 -s localhost -p 2048 -i input_dir
 	
 val: $(EXEC) 
-	valgrind -v --leak-check=full --show-leak-kinds=all ./diseaseAggregator \
+	valgrind -v --leak-check=full --show-leak-kinds=all ./master \
 	-w 4 -b 256 -i input_dir
 
