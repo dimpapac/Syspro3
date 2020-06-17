@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
 	int *fifosR= malloc(sizeof(int) * numWorkers);
 	int *fifosW= malloc(sizeof(int) * numWorkers);
 	// printf("NUMBER OF Workers %d\n", numWorkers);
-	printf("Waiting for statistics...\n");
+	// printf("Waiting for statistics...\n");
 	for (int i = 0; i < numWorkers; i++){ //for each worker
 		
 		readFifosNames[i] = malloc((strlen("/tmp/pipeR") + 3) * sizeof(char));

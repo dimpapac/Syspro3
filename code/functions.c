@@ -1,9 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
 #include <dirent.h>
-#include <unistd.h>
 #include <signal.h>
 // #include <errno.h>
 
@@ -13,6 +10,18 @@
 #include "functions1.h"
 // #include "heap.h"
 
+
+
+#include <sys/wait.h>	     /* sockets */
+#include <sys/types.h>	     /* sockets */
+#include <sys/socket.h>	     /* sockets */
+#include <netinet/in.h>	     /* internet sockets */
+#include <netdb.h>	         /* gethostbyaddr */
+#include <unistd.h>	         /* fork */		
+#include <ctype.h>	         /* toupper */
+#include <signal.h>          /* signal */
+#include <string.h>
+#include <arpa/inet.h>
 
 int pflag;
 int ptotal;
@@ -619,7 +628,51 @@ void cli(paths_list_node **list_head, int *pids, int numWorkers, int *fifosR, in
 
 
 
-void write_stats(bucket **HashTable,  int HashNum, char *date, char *country, int fifosW){
+
+void perror_exit(char *message)
+{
+    perror(message);
+    exit(EXIT_FAILURE);
+}
+
+
+void connecttoserver(char* serveraddress, int port, char* command){
+
+	char buf[1256];
+	int sock,length;
+    struct sockaddr_in server;
+    struct sockaddr *serverptr = (struct sockaddr*)&server;
+    struct hostent *rem;
+
+
+	/* Create socket */
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    	perror_exit("socket");
+	/* Find server address */
+    if ((rem = gethostbyname(serveraddress)) == NULL) {	
+	   herror("gethostbyname"); exit(1);
+    }
+
+    server.sin_family = AF_INET;       /* Internet domain */
+    memcpy(&server.sin_addr, rem->h_addr, rem->h_length);
+    server.sin_port = htons(port);         /* Server port */
+	if (connect(sock, serverptr, sizeof(server)) < 0)
+   		perror_exit("connect");
+	//printf("Connecting to %s port %d\n", argv[1], port);
+	if(write(sock, command, strlen(command)) < 0)
+		perror_exit("write");
+    if ((length=read(sock, buf, 1256)) < 0)
+    	perror_exit("read");    
+    	   	
+ 	buf[length]=0;
+	// printf("%ssdfgdsfgdfgsdf\n",buf);close(sock); 
+
+
+}
+
+
+
+void write_stats(bucket **HashTable,  int HashNum, char *date, char *country, char *serveraddress, int port){
 	char string[1000];
 
 	sprintf(string, "%s", date);
@@ -670,21 +723,21 @@ void write_stats(bucket **HashTable,  int HashNum, char *date, char *country, in
 	
 	//write to fifoW
 	// printf("%s\n", string);
-	int size = (int) strlen(string) + 1;
-	// printf("STRLEN STRING %d\n", (int) strlen(string));
-	if (write(fifosW, &size, sizeof(int)) == -1){ 
-		perror("write");
-		// return -1;
-	}
+	// int size = (int) strlen(string) + 1;
+	// // printf("STRLEN STRING %d\n", (int) strlen(string));
+	// if (write(fifosW, &size, sizeof(int)) == -1){ 
+	// 	perror("write");
+	// 	// return -1;
+	// }
 
 
-	// printf("STRLEN STRING %d\n", (int) strlen(string));
-	if (write(fifosW, string, size) == -1){ 
-		perror("write");
-		// return -1;
-	}
+	// // printf("STRLEN STRING %d\n", (int) strlen(string));
+	// if (write(fifosW, string, size) == -1){ 
+	// 	perror("write");
+	// 	// return -1;
+	// }
 
-
+	connecttoserver(serveraddress, port, string);
 
 
 	strcpy(string, " ");
@@ -729,7 +782,7 @@ void write_stats(bucket **HashTable,  int HashNum, char *date, char *country, in
 
 
 
-int dirCounty(char *countryDir, list_node **head, bucket **diseaseHashTable, bucket **countryHashTable, int diseaseHashNum, int countryHashNum, int capacity, int fifosW){
+int dirCounty(char *countryDir, list_node **head, bucket **diseaseHashTable, bucket **countryHashTable, int diseaseHashNum, int countryHashNum, int capacity, char *serverIP, int port){
 
 	// printf("dirCounty------->%s\n", countryDir);
 	// char token[15];
@@ -856,7 +909,7 @@ int dirCounty(char *countryDir, list_node **head, bucket **diseaseHashTable, buc
 			}
 		}
 			
-		// write_stats(diseaseHashTable, diseaseHashNum, de->d_name, country, fifosW);
+		write_stats(diseaseHashTable, diseaseHashNum, de->d_name, country, serverIP, port);
     }
  	
  // 	//write -15 indication that i finished with stats

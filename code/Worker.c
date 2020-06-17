@@ -146,10 +146,23 @@ int main(int argc, char *argv[])
 		// sleep(1);
 	}
 
+	char *serverIP;
+	int serverPort = 0;
+	size = 0;
+	read(fifosR, &size, sizeof(int));
+  	// printf("retVal %d\n", retVal);
+	serverIP = malloc(size * sizeof(char) + 1);
+	bytesread = read(fifosR, serverIP, size);
+	// printf("bytesread %d\n", bytesread);
+    serverIP[size] = '\0';
+   	read(fifosR, &serverPort, sizeof(int));
+    printf("Received: %s --- %d ----  bytesread: %d\n", serverIP, serverPort, bytesread);
+
+
 	paths_list_node * cur = path_head;
 	while(cur != NULL){
 		// printf("cur->path %s\n", cur->path);
-		dirCounty(cur->path, &head, diseaseHashTable, countryHashTable, diseaseHashNum, countryHashNum, capacity, fifosW);
+		dirCounty(cur->path, &head, diseaseHashTable, countryHashTable, diseaseHashNum, countryHashNum, capacity, serverIP, serverPort);
 		// write statistics 
 		// int pid = getpid();
 		// if (write(fifosW, &pid, sizeof(int)) == -1){ 
@@ -166,19 +179,9 @@ int main(int argc, char *argv[])
 	// 	// return -1;
 	// }
 
-	char *serverIP;
-	int serverPort = 0;
-	size = 0;
-	int retVal = read(fifosR, &size, sizeof(int));
-  	// printf("retVal %d\n", retVal);
-	serverIP = malloc(size * sizeof(char) + 1);
-	bytesread = read(fifosR, serverIP, size);
-	// printf("bytesread %d\n", bytesread);
-    serverIP[size] = '\0';
-   	read(fifosR, &serverPort, sizeof(int));
-    printf("Received: %s --- %d ----  bytesread: %d\n", serverIP, serverPort, bytesread);
 
     // printf("Received: %s  ----  bytesread: %d -----pid: %d\n", buffer, bytesread, getpid());
+
 
 
 
