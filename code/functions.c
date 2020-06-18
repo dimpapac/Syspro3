@@ -672,8 +672,8 @@ void connecttoserver(char* serveraddress, int port, char* command){
 
 
 
-void write_stats(bucket **HashTable,  int HashNum, char *date, char *country, char *serveraddress, int port){
-	char string[1000];
+char * write_stats(bucket **HashTable,  int HashNum, char *date, char *country, char *serveraddress, int port){
+	char *string = malloc(sizeof(char) * 1000);
 
 	sprintf(string, "%s", date);
 	sprintf(string, "%s\n%s", string, country);
@@ -737,10 +737,10 @@ void write_stats(bucket **HashTable,  int HashNum, char *date, char *country, ch
 	// 	// return -1;
 	// }
 
-	connecttoserver(serveraddress, port, string);
+	// connecttoserver(serveraddress, port, string);
 
 
-	strcpy(string, " ");
+	// strcpy(string, " ");
 
 
 	//reset counters to 0
@@ -772,9 +772,7 @@ void write_stats(bucket **HashTable,  int HashNum, char *date, char *country, ch
 		}
 	}
 
-
-
-
+	return string;
 }
 
 
@@ -782,7 +780,7 @@ void write_stats(bucket **HashTable,  int HashNum, char *date, char *country, ch
 
 
 
-int dirCounty(char *countryDir, list_node **head, bucket **diseaseHashTable, bucket **countryHashTable, int diseaseHashNum, int countryHashNum, int capacity, char *serverIP, int port){
+char *dirCounty(char *countryDir, list_node **head, bucket **diseaseHashTable, bucket **countryHashTable, int diseaseHashNum, int countryHashNum, int capacity, char *serverIP, int port){
 
 	// printf("dirCounty------->%s\n", countryDir);
 	// char token[15];
@@ -798,9 +796,10 @@ int dirCounty(char *countryDir, list_node **head, bucket **diseaseHashTable, buc
   
     if (dr == NULL){  // opendir returns NULL if couldn't open directory  
         perror("opendir"); 
-        return 0; 
+        // return 0; 
+    	return NULL;
     } 
-  
+  	char *stats = malloc(sizeof(char) *1000000);
     //de -> directory entry
     while ((de = readdir(dr)) != NULL) {
     	if (!strcmp(de->d_name, ".") || !strcmp(de->d_name, "..")) //skip . and ..
@@ -841,7 +840,8 @@ int dirCounty(char *countryDir, list_node **head, bucket **diseaseHashTable, buc
 			if (new_entry == NULL)
 			{
 				printf("problem\n");
-				return -1;
+				// return -1;
+				return NULL;
 			}
 			// print_entry(new_entry);
 				
@@ -892,7 +892,8 @@ int dirCounty(char *countryDir, list_node **head, bucket **diseaseHashTable, buc
 					//close file
 					// fclose(input);
 					// free(inputfile);
-					return -1; 
+					// return -1;
+					return NULL; 
 				}
 
 				//insert patient to a sorted list
@@ -905,11 +906,13 @@ int dirCounty(char *countryDir, list_node **head, bucket **diseaseHashTable, buc
 				csuccess++;
 			}
 			else {
-				return -3;
+				// return -3;
+				return NULL;
 			}
 		}
-			
-		write_stats(diseaseHashTable, diseaseHashNum, de->d_name, country, serverIP, port);
+		
+		char * stat = write_stats(diseaseHashTable, diseaseHashNum, de->d_name, country, serverIP, port);
+		sprintf(stats,"%s\n%s", stats, stat);
     }
  	
  // 	//write -15 indication that i finished with stats
@@ -926,7 +929,7 @@ int dirCounty(char *countryDir, list_node **head, bucket **diseaseHashTable, buc
     // print_hash(diseaseHashTable, diseaseHashNum);
 
 
-    return 0; 
+    return stats; 
 }
 
 

@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 	// 	return -1; 
 	// }
 	// printf("KALISPERA\n");
-
+	char *stats = malloc(sizeof(char) *1000000);
 	int diseaseHashNum = 7;
 	int countryHashNum = 7;
 	int bucketSize = 70;
@@ -162,15 +162,18 @@ int main(int argc, char *argv[])
 	paths_list_node * cur = path_head;
 	while(cur != NULL){
 		// printf("cur->path %s\n", cur->path);
-		dirCounty(cur->path, &head, diseaseHashTable, countryHashTable, diseaseHashNum, countryHashNum, capacity, serverIP, serverPort);
-		// write statistics 
-		// int pid = getpid();
-		// if (write(fifosW, &pid, sizeof(int)) == -1){ 
-		// 	perror("write");
-		// 	return -1;
-		// }
+		char *stat = dirCounty(cur->path, &head, diseaseHashTable, countryHashTable, diseaseHashNum, countryHashNum, capacity, serverIP, serverPort);
+		sprintf(stats,"%s\n%s", stats, stat);
 		cur = cur->next;
 	}
+
+	// printf("STATS APO WORKER %d\n", getpid());
+	// printf("%s\n", stats);
+	// printf("telos %d\n", getpid());
+	//write to server all stats at once
+	connecttoserver(serverIP, serverPort, stats);
+	
+
 
 	//write -15 indication that i finished with stats
  // 	int end = -15;
