@@ -188,12 +188,20 @@ void free_path_list(paths_list_node *head){
 
 
 
-worker_info* append_worker_list(worker_info **head, char *IP, int fd){
+worker_info* append_worker_list(worker_info **head, char *IP, int fd, int countriesCounter, char **countries){
 
 	worker_info *new_node = malloc(sizeof(worker_info));
+	
 	new_node->fd = fd;
 	new_node->IP = malloc((strlen(IP) + 1) * sizeof(char));
 	strcpy(new_node->IP, IP);
+	new_node->counter = countriesCounter;
+    new_node->countries = malloc(sizeof(char *) * countriesCounter);
+    for (int i = 0; i < countriesCounter; i++)
+	{
+		new_node->countries[i] = malloc((strlen(countries[i])+1) * sizeof(char));
+        strcpy(new_node->countries[i], countries[i]);
+	}
 	new_node->next = NULL;
 
 	worker_info* last = *head;
@@ -222,7 +230,13 @@ void print_worker_list(worker_info *head){
 
 	while(head != NULL){
 		// printf("kalispera apo print list\n");
-		printf("fd---> %d, IP---> %s \n", head->fd, head->IP);
+		printf("fd---> %d\n", head->fd);
+		printf("IP---> %s \n", head->IP);
+		printf("countriesCounter %d\n", head->counter);
+		for (int i = 0; i < head->counter; ++i)
+		{
+			printf("%s\n", head->countries[i]);
+		}
 		head = head->next;
 	}
 }

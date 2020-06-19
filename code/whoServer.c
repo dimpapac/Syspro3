@@ -30,6 +30,9 @@
 
 #include "whoServer.h"
 
+#define MAX_BUF 1000000
+
+
 // void perror_exit(char *message) {
 //     perror(message);
 //     exit(EXIT_FAILURE);
@@ -109,6 +112,12 @@ Client_info obtain() {
 // 	pthread_exit(0);
 // }
 
+
+void handle_worker(char *buffer){
+
+	printf("buffer in handle_worker %s\n", buffer);
+}
+
 void * consumer() //thread function
 {
 	Client_info client_info;
@@ -117,41 +126,70 @@ void * consumer() //thread function
 		// Client_info toread = obtain();
     	// printf("from obtain %d %s\n", toread.fd, toread.IP);
     	// print_pool();
-        char buff[1000000];
+        char buff[MAX_BUF];
         memset(buff, 0, sizeof(buff));
-        read(client_info.fd, buff, 1000000);
-        pthread_mutex_lock(&list_mtx);
-        printf("%s\n", buff);
-        append_worker_list(&worker_info_head, "kalispera", client_info.fd);
-        printf("thread id: %ld\n", pthread_self() );
-        pthread_mutex_unlock(&list_mtx);
+        read(client_info.fd, buff, MAX_BUF);
+        //strtok buff --> w/c@port$stats#country#country#country
+        char *token = strtok(buff, "@");
+        if (strcmp(token,"w") == 0 )
+        {
+        	// handle_worker(buff);
+
+        	char *port_s = strtok(NULL, "$");
+        	int port = atoi(port_s);
+        	char *stats = strtok(NULL, "#");
+        	char *countriesString = strtok(NULL, "&");
+
+        	//count countries
+		    int countriesCounter = 0;
+
+		    for (int i = 0; i < strlen(countriesString); i++)
+		    {
+		    	if (countriesString[i] == '#')
+		    	{
+		    		countriesCounter++;
+		    	}
+		    }
+
+		    countriesCounter++; // +1 of '#'
+
+        	char **countries = malloc(sizeof(char *) * countriesCounter);
+
+        	int pos = 0;
+        	char *country = strtok(countriesString, "#");
+        	while(country != NULL){
+        		countries[pos] = malloc((strlen(country)+1) * sizeof(char));
+        		strcpy(countries[pos], country);
+        		pos++;
+        		country = strtok(NULL, "#");
+        	}
+
+        	for (int i = 0; i < countriesCounter; ++i)
+        	{
+        		printf("%s\n", countries[i]);
+        	}
+
+	        pthread_mutex_lock(&list_mtx); //lock for global list and print 
+        	// printf("%s\n", stats);
+	        append_worker_list(&worker_info_head, client_info.IP, port, countriesCounter, countries);
+	        // printf("thread id: %ld\n", pthread_self() );
+	        pthread_mutex_unlock(&list_mtx); //unlock
+        	print_worker_list(worker_info_head);
+        }
+        else
+        {
+        	//handle_client()
+
+        }
+
+
+
     	close(client_info.fd); /* server closes socket to client */
 
 
-
-		/*
-			1. read apo client_info.fd enan int (sizeof(int))
-				if int = 0 
-					handle worker
-				else 
-					handle client
-			read apo client_info.fd enan terastio array kai strtok gia tis ipolipes plirofories 
-		*/
 	}
 }
 
-/* handle worker
-	read port number (se enan int) kai to vazw stin lista gia tous workers(global) 
-	read ta statistika apo ton worker 
-	read tis xores se lista opos eixe o aggregatos gia na kaleitai to idio cli 
-	
-	lock(list_mutex)
-	insert worker stin lista
-	print(statistics)
-	unlock(list_mutex)
-
-
-*/
 
 int main(int argc, char *argv[])
 {
@@ -198,18 +236,12 @@ int main(int argc, char *argv[])
 
 
 	worker_info_head = NULL;
-	// append_worker_list(&worker_info_head, "kalisperes", 1);
-	// append_worker_list(&worker_info_head, "kalisperes", 2);
-	// append_worker_list(&worker_info_head, "kalisperes", 3);
-	// append_worker_list(&worker_info_head, "kalisperes", 4);
-	// print_worker_list(worker_info_head);
 
 	initialize(&pool);
 
-	printf("karaseg\n");
 	// threads
 	pthread_t thr[numThreads];
-	int err, status;
+	int err;
 	for (int i = 0; i < numThreads; i++)
 	{
 		if ((err = pthread_create(&thr[i], NULL, consumer, NULL))) { /* New thread */
@@ -234,7 +266,7 @@ int main(int argc, char *argv[])
         perror_exit("socket");
     server.sin_family = AF_INET;       /* Internet domain */
     server.sin_addr.s_addr = htonl(INADDR_ANY);
-    // server.sin_port = htons(port);      /* The given port */
+    server.sin_port = htons(port);      /* The given port */
 
     /* Bind socket to address */
     if (bind(sock, serverptr, sizeof(server)) < 0)
@@ -261,23 +293,11 @@ int main(int argc, char *argv[])
     	client_info.IP = malloc(sizeof(char)* (strlen(s) + 1));
     	strcpy(client_info.IP, s);
     	place(client_info);
-    	print_pool();
+    	// print_pool();
 
     	printf("Accepted connection from %s\n", s);
-	// print_worker_list(worker_info_head);
+		// print_worker_list(worker_info_head);
 
-    	// Client_info toread = obtain();
-    	// printf("from obtain %d %s\n", toread.fd, toread.IP);
-    	// // print_pool();
-
-     //    char buff[1000000];
-     //    memset(buff, 0, sizeof(buff));
-     //    read(toread.fd, buff, 1000000);
-
-     //    printf("%s\n", buff);
-
-    	// close(newsock); /* parent closes socket to client */
-    	// consumer();
     }
 
     

@@ -1,15 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <dirent.h> 
-#include <sys/types.h>
-#include <sys/wait.h>
+#include <dirent.h> //dirs
 #include <unistd.h>
 #include <sys/stat.h>
 #include <fcntl.h> // for open
 #include <unistd.h> // for close
 #include <signal.h>
 #include <errno.h> 
+#include <sys/wait.h>	     /* sockets */
+#include <sys/types.h>	     /* sockets */
+#include <sys/socket.h>	     /* sockets */
+#include <netinet/in.h>	     /* internet sockets */
+#include <netdb.h>	         /* gethostbyaddr */
+#include <unistd.h>	         /* fork */		
+#include <ctype.h>	         /* toupper */
+#include <signal.h>          /* signal */
+#include <string.h>
+#include <arpa/inet.h>
 
 #include "structs.h"
 #include "functions.h"
@@ -159,20 +167,97 @@ int main(int argc, char *argv[])
     printf("Received: %s --- %d ----  bytesread: %d\n", serverIP, serverPort, bytesread);
 
 
+    //listening port 
+
+    int port, sock, newsock;
+    struct sockaddr_in server, client;
+    socklen_t clientlen = sizeof(struct sockaddr_in);
+    struct sockaddr *serverptr=(struct sockaddr *)&server;
+    struct sockaddr *clientptr=(struct sockaddr *)&client;
+    //struct hostent *rem;
+   
+    /* Create socket */
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+        perror_exit("socket");
+    server.sin_family = AF_INET;       /* Internet domain */
+    server.sin_addr.s_addr = htonl(INADDR_ANY);
+    server.sin_port = htons(INADDR_ANY);      /* The given port */
+
+    /* Bind socket to address */
+    if (bind(sock, serverptr, sizeof(server)) < 0)
+        perror_exit("bind");
+
+    getsockname(sock, (struct sockaddr *)&server, &clientlen); // pairnei ti proti diathesimi port apo to sistima kai ti vazei sto server
+    port = ntohs(server.sin_port);
+    /* Listen for connections */
+    if (listen(sock, 5) < 0) perror_exit("listen");
+
+
+
+
+
+
+
+
+    sprintf(stats, "w@%d$", port);
+
+    // printf("stats--- %s\n", stats);
 	paths_list_node * cur = path_head;
 	while(cur != NULL){
 		// printf("cur->path %s\n", cur->path);
 		char *stat = dirCounty(cur->path, &head, diseaseHashTable, countryHashTable, diseaseHashNum, countryHashNum, capacity, serverIP, serverPort);
-		sprintf(stats,"%s\n%s", stats, stat);
+		sprintf(stats,"%s%s", stats, stat);
 		cur = cur->next;
 	}
+
 
 	// printf("STATS APO WORKER %d\n", getpid());
 	// printf("%s\n", stats);
 	// printf("telos %d\n", getpid());
 	//write to server all stats at once
+
+
+	paths_list_node *cur1 = path_head;
+	while(cur1 != NULL){
+		// printf("%s\n", cur1->path);
+		char * token = strtok(cur1->path, "/");
+		token = strtok(NULL, " ");
+		sprintf(stats, "%s#%s", stats, token);
+		cur1 = cur1->next;
+	}
+
+	sprintf(stats, "%s&", stats);
+	// printf("stats-->%s\n", stats);
+
 	connecttoserver(serverIP, serverPort, stats);
 	
+
+	printf("Listening for connections to port %d, %d\n", port, server.sin_addr.s_addr);
+    while (1) {
+        /* accept connection */
+    	if ((newsock = accept(sock, clientptr, &clientlen)) < 0) perror_exit("accept");
+
+    	// convert to client ip
+		struct sockaddr_in *addr_in = (struct sockaddr_in *)clientptr;
+		char *s = inet_ntoa(addr_in->sin_addr);
+
+
+    	printf("Accepted connection from %s\n", s);
+	// print_worker_list(worker_info_head);
+
+    	// Client_info toread = obtain();
+    	// printf("from obtain %d %s\n", toread.fd, toread.IP);
+    	// // print_pool();
+
+     //    char buff[1000000];
+     //    memset(buff, 0, sizeof(buff));
+     //    read(toread.fd, buff, 1000000);
+
+     //    printf("%s\n", buff);
+
+    	// close(newsock); /* parent closes socket to client */
+    	// consumer();
+    }
 
 
 	//write -15 indication that i finished with stats

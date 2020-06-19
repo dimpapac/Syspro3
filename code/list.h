@@ -31,7 +31,7 @@ void free_path_list(paths_list_node *head);
 
 
 //list for worker_info
-worker_info* append_worker_list(worker_info **head, char *IP, int fd);
+worker_info* append_worker_list(worker_info **head, char *IP, int fd, int countriesCounter, char **countries);
 void print_worker_list(worker_info *head);
 void free_worker_list(worker_info *head);
 

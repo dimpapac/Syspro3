@@ -22,7 +22,7 @@ clean:
 	rm -f $(OBJS) $(EXEC) $(COBJS) $(CEXEC) $(QOBJS) $(QEXEC) $(JOBJS) $(JEXEC) log_file*
 
 run: $(EXEC) $(CEXEC)
-	./master -w 7 -b 256 -s localhost -p 54798 -i input_dir
+	./master -w 4 -b 256 -s localhost -p 8000 -i input_dir
 	
 val: $(EXEC) 
 	valgrind -v --leak-check=full --show-leak-kinds=all ./master \

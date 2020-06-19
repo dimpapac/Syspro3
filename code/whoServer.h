@@ -10,7 +10,7 @@
 
 typedef struct wi{
 	int counter; 
-	char **country; //malloc(sizeof(counter)) diplo malloc
+	char **countries; //malloc(sizeof(counter)) diplo malloc
 	int fd; 
 	char *IP;
 	struct wi *next;
