@@ -8,11 +8,12 @@
 #include <unistd.h>
 
 
-typedef struct {
+typedef struct wi{
 	int counter; 
 	char **country; //malloc(sizeof(counter)) diplo malloc
 	int fd; 
 	char *IP;
+	struct wi *next;
 } worker_info;
 
 typedef struct {

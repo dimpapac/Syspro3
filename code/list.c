@@ -179,3 +179,61 @@ void free_path_list(paths_list_node *head){
 		free(tmp);
 	}
 }
+
+
+
+
+
+//list for worker_info
+
+
+
+worker_info* append_worker_list(worker_info **head, char *IP, int fd){
+
+	worker_info *new_node = malloc(sizeof(worker_info));
+	new_node->fd = fd;
+	new_node->IP = malloc((strlen(IP) + 1) * sizeof(char));
+	strcpy(new_node->IP, IP);
+	new_node->next = NULL;
+
+	worker_info* last = *head;
+	if (*head == NULL) //list is empty 
+	{
+		*head = new_node; 
+	}
+	else
+	{
+		//traverse till the last node 
+		while (last->next != NULL)
+			last = last->next; 
+
+		last->next = new_node; 		
+	}
+
+	return new_node;
+}
+
+
+
+void print_worker_list(worker_info *head){
+	printf("--------------PRINTING WORKER LIST--------------\n");
+	// if (head == NULL)
+	// 	return;
+
+	while(head != NULL){
+		// printf("kalispera apo print list\n");
+		printf("fd---> %d, IP---> %s \n", head->fd, head->IP);
+		head = head->next;
+	}
+}
+
+
+void free_worker_list(worker_info *head){
+	worker_info *tmp = NULL;
+	while (head != NULL){
+		tmp = head;
+		head = head->next;
+		free(tmp->IP);
+		free(tmp);
+	}
+}

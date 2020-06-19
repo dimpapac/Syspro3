@@ -1,0 +1,8 @@
+/diseaseFrequency H1N1 1-2-2000 14-2-2020 Italy
+/searchPatientRecord 56
+/numPatientAdmissions MERS-COV 21-4-2015 3-1-2019 Greece
+/numPatientDischarges H1N1 21-4-2015 3-1-2019 China
+/diseaseFrequency COVID-2019 21-4-2015 3-1-2019 
+/searchPatientRecord 123
+/numPatientAdmissions COVID-2019 21-4-2015 3-1-2019 
+/numPatientDischarges MERS-COV 21-4-2015 3-1-2019 

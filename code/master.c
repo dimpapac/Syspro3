@@ -292,50 +292,6 @@ int main(int argc, char *argv[])
 	}
 	
 
-	//statistics
-	// /*non-blocking pipe*/
-	// int size = 0; 
-	// // int ret = 0;
-	// char stats[1000];
- //    for (int i = 0; i < numWorkers; i++)
-	// {
- //        while(1)
-	// 	{
-	// 	   	while (read(fifosR[i], &size, sizeof(int)) < 0){ 
-	// 	   		// if (errno == EAGAIN) { 
-	// 		    //     printf("(pipe empty)\n"); 
-	// 		    //     sleep(1);
-	// 		    //     // break; 
-	// 		    // }
-	// 		    // printf("PAMELIGO\n");
-	// 		}
-	//     	// printf("sizeOfMessage in worker  %d  ----pid: %d\n", size, getpid());
-	//     	// printf("size %d\n", size);
-	//     	// break;
-	//     	if (size == -15)
-	//     	{
-	//     		// printf("TELOS\n");
-	//     		break;
-	//     	}
-	//     	// sleep(1);
-
-	//     	while (read(fifosR[i], stats, size) < 0){ 
-	// 	   		// if (errno == EAGAIN) { 
-	// 		    //     printf("(pipe empty)\n"); 
-	// 		    //     sleep(1);
-	// 		    //     // break; 
-	// 		    // }
-	// 		    // printf("PAMELIGO\n");
-	// 		}
-
-	// 		printf("%s\n", stats);
-
-	// 	}
-
-	// }
-
-	// printf("PROCESS ID: %d\n", getpid());
-
 	/*non-blocking pipe*/
 
 

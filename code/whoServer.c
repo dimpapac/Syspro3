@@ -18,6 +18,7 @@
 #include <signal.h>          /* signal */
 #include <string.h>
 #include <arpa/inet.h>
+#include <pthread.h>
 
 
 
@@ -29,19 +30,23 @@
 
 #include "whoServer.h"
 
-void perror_exit(char *message) {
-    perror(message);
-    exit(EXIT_FAILURE);
-}
+// void perror_exit(char *message) {
+//     perror(message);
+//     exit(EXIT_FAILURE);
+// }
 
 int bufferSize;
 int num_of_items = 15;
 
+//mutexes and condition variables
 pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t list_mtx = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t cond_nonempty = PTHREAD_COND_INITIALIZER;
 pthread_cond_t cond_nonfull = PTHREAD_COND_INITIALIZER;
-pool_t *pool;
+
+//public data structures
+pool_t *pool; //circular buffer
+worker_info *worker_info_head;
 
 
 void print_pool(){
@@ -78,7 +83,7 @@ void place(Client_info client_info) {
 
 Client_info obtain() {
 	Client_info client_info;
-	printf("what\n");
+	// printf("what\n");
 	pthread_mutex_lock(&mtx);
 	while (pool->count <= 0) {
 		printf(">> Found Buffer Empty \n");
@@ -104,12 +109,26 @@ Client_info obtain() {
 // 	pthread_exit(0);
 // }
 
-void * consumer()
+void * consumer() //thread function
 {
 	Client_info client_info;
 	while(1){
-		printf("elamou\n");
 		client_info = obtain();
+		// Client_info toread = obtain();
+    	// printf("from obtain %d %s\n", toread.fd, toread.IP);
+    	// print_pool();
+        char buff[1000000];
+        memset(buff, 0, sizeof(buff));
+        read(client_info.fd, buff, 1000000);
+        pthread_mutex_lock(&list_mtx);
+        printf("%s\n", buff);
+        append_worker_list(&worker_info_head, "kalispera", client_info.fd);
+        printf("thread id: %ld\n", pthread_self() );
+        pthread_mutex_unlock(&list_mtx);
+    	close(client_info.fd); /* server closes socket to client */
+
+
+
 		/*
 			1. read apo client_info.fd enan int (sizeof(int))
 				if int = 0 
@@ -177,18 +196,27 @@ int main(int argc, char *argv[])
 
 	// printf("%d %d %d %d\n", queryPortNum, statisticsPortNum, numThreads, bufferSize);
 
-	// printf("karaseg\n");
-	// // threads
-	// pthread_t thr[numThreads];
-	// int err, status;
-	// for (int i = 0; i < numThreads; i++)
-	// {
-	// 	if ((err = pthread_create(&thr[i], NULL, consumer, NULL))) { /* New thread */
-	// 		perror("pthread_create");
-	// 		exit(1); 
-	// 	}
-	// }
 
+	worker_info_head = NULL;
+	// append_worker_list(&worker_info_head, "kalisperes", 1);
+	// append_worker_list(&worker_info_head, "kalisperes", 2);
+	// append_worker_list(&worker_info_head, "kalisperes", 3);
+	// append_worker_list(&worker_info_head, "kalisperes", 4);
+	// print_worker_list(worker_info_head);
+
+	initialize(&pool);
+
+	printf("karaseg\n");
+	// threads
+	pthread_t thr[numThreads];
+	int err, status;
+	for (int i = 0; i < numThreads; i++)
+	{
+		if ((err = pthread_create(&thr[i], NULL, consumer, NULL))) { /* New thread */
+			perror("pthread_create");
+			exit(1); 
+		}
+	}
 
 
 
@@ -218,7 +246,7 @@ int main(int argc, char *argv[])
     if (listen(sock, 5) < 0) perror_exit("listen");
 
     
-    initialize(&pool);
+    
     Client_info client_info;
     printf("Listening for connections to port %d, %d\n", port, server.sin_addr.s_addr);
     while (1) {
@@ -236,18 +264,20 @@ int main(int argc, char *argv[])
     	print_pool();
 
     	printf("Accepted connection from %s\n", s);
+	// print_worker_list(worker_info_head);
 
-    	Client_info toread = obtain();
-    	printf("from obtain %d %s\n", toread.fd, toread.IP);
-    	print_pool();
+    	// Client_info toread = obtain();
+    	// printf("from obtain %d %s\n", toread.fd, toread.IP);
+    	// // print_pool();
 
-        char buff[1000000];
-        memset(buff, 0, sizeof(buff));
-        read(newsock, buff, 1000000);
+     //    char buff[1000000];
+     //    memset(buff, 0, sizeof(buff));
+     //    read(toread.fd, buff, 1000000);
 
-        // printf("%s\n", buff);
+     //    printf("%s\n", buff);
 
-    	close(newsock); /* parent closes socket to client */
+    	// close(newsock); /* parent closes socket to client */
+    	// consumer();
     }
 
     
