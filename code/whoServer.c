@@ -19,6 +19,7 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <pthread.h>
+#include <poll.h>
 
 
 
@@ -31,7 +32,7 @@
 #include "whoServer.h"
 
 #define MAX_BUF 1000000
-
+#define MAX_FD 2 
 
 // void perror_exit(char *message) {
 //     perror(message);
@@ -190,6 +191,27 @@ void * consumer() //thread function
 	}
 }
 
+void reset_socket_info(Socket_info *socket_info, int stats_sock, int query_sock){
+	socket_info[0].fd = stats_sock;
+	socket_info[1].fd = query_sock;
+	for (int i = 0; i < MAX_FD; i++){
+		socket_info[i].flag = 0;
+	}
+}
+
+//return 1 if fds == 1 
+int checkFlags(Socket_info *socket_info){
+	for (int i = 0; i < MAX_FD; ++i){
+		if (socket_info[i].flag != 0){
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
+
+
 
 int main(int argc, char *argv[])
 {
@@ -252,55 +274,112 @@ int main(int argc, char *argv[])
 
 
 
-	int port, sock, newsock;
+	int stats_sock, query_sock, newsock;
     struct sockaddr_in server, client;
     socklen_t clientlen = sizeof(struct sockaddr_in);
     struct sockaddr *serverptr=(struct sockaddr *)&server;
     struct sockaddr *clientptr=(struct sockaddr *)&client;
     //struct hostent *rem;
    
-    port = statisticsPortNum;
+    // port = statisticsPortNum;
+    // port2 = queryPortNum;
 
     /* Create socket */
-    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    if ((stats_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0 || (query_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
         perror_exit("socket");
     server.sin_family = AF_INET;       /* Internet domain */
     server.sin_addr.s_addr = htonl(INADDR_ANY);
-    server.sin_port = htons(port);      /* The given port */
+    server.sin_port = htons(statisticsPortNum);      /* The given port */
 
     /* Bind socket to address */
-    if (bind(sock, serverptr, sizeof(server)) < 0)
+    if (bind(stats_sock, serverptr, sizeof(server)) < 0)
         perror_exit("bind");
 
-    getsockname(sock, (struct sockaddr *)&server, &clientlen); // pairnei ti proti diathesimi port apo to sistima kai ti vazei sto server
-    port = ntohs(server.sin_port);
+    server.sin_port = htons(queryPortNum);
+     /* Bind socket to address */
+    if (bind(query_sock, serverptr, sizeof(server)) < 0)
+        perror_exit("bind");
+
+    getsockname(stats_sock, (struct sockaddr *)&server, &clientlen); // pairnei ti proti diathesimi port apo to sistima kai ti vazei sto server
+    statisticsPortNum = ntohs(server.sin_port);
+
+    getsockname(query_sock, (struct sockaddr *)&server, &clientlen); // pairnei ti proti diathesimi port apo to sistima kai ti vazei sto server
+    queryPortNum = ntohs(server.sin_port);
     /* Listen for connections */
-    if (listen(sock, 5) < 0) perror_exit("listen");
+    if (listen(stats_sock, 15) < 0) perror_exit("listen");
+
+    if (listen(query_sock, 15) < 0) perror_exit("listen");
 
     
     
     Client_info client_info;
-    printf("Listening for connections to port %d, %d\n", port, server.sin_addr.s_addr);
-    while (1) {
-        /* accept connection */
-    	if ((newsock = accept(sock, clientptr, &clientlen)) < 0) perror_exit("accept");
+    printf("Listening for connections to statisticsPortNum %d, %d\n", statisticsPortNum, server.sin_addr.s_addr);
+    printf("Listening for connections to queryPortNum %d, %d\n", queryPortNum, server.sin_addr.s_addr);
 
-    	// convert to client ip
-		struct sockaddr_in *addr_in = (struct sockaddr_in *)clientptr;
-		char *s = inet_ntoa(addr_in->sin_addr);
+    Socket_info socket_info[MAX_FD];
+    while (1){
+    	struct pollfd pollfds[MAX_FD];
+    	reset_socket_info(socket_info, stats_sock, query_sock);
 
-    	client_info.fd = newsock;
-    	client_info.IP = malloc(sizeof(char)* (strlen(s) + 1));
-    	strcpy(client_info.IP, s);
-    	place(client_info);
-    	// print_pool();
+    	while(checkFlags(socket_info)){
+	        for (int i = 0; i < MAX_FD; i++)
+	        {
+	            pollfds[i].fd = socket_info[i].fd;
+	            pollfds[i].events = POLLIN;
+	        }
 
-    	printf("Accepted connection from %s\n", s);
-		// print_worker_list(worker_info_head);
+	        poll(pollfds, MAX_FD, -1);
+	        //printf("Infinite\n");
+	        for (int i = 0; i < MAX_FD; i++)
+	        {                
+	            if((pollfds[i].revents & POLLIN))
+	            {
+	                if(pollfds[i].fd == socket_info[i].fd){
+	                	    /* accept connection */
+						if ((newsock = accept(socket_info[i].fd, clientptr, &clientlen)) < 0) perror_exit("accept");
 
+						// convert to client ip
+						struct sockaddr_in *addr_in = (struct sockaddr_in *)clientptr;
+						char *s = inet_ntoa(addr_in->sin_addr);
+
+						client_info.fd = newsock;
+						client_info.IP = malloc(sizeof(char)* (strlen(s) + 1));
+						strcpy(client_info.IP, s);
+						place(client_info);
+						// print_pool();
+						socket_info[i].flag = 1;
+						printf("Accepted connection from %s\n", s);
+						// print_worker_list(worker_info_head);
+	                }
+	            }
+	            else if((pollfds[i].revents & POLLHUP)){
+                    socket_info[i].flag = 0;
+	            }
+	        }        	
+    	}
     }
 
-    
+
+
+  //   while (1) {
+  //       /* accept connection */
+  //   	if ((newsock = accept(stats_sock, clientptr, &clientlen)) < 0) perror_exit("accept");
+
+  //   	// convert to client ip
+		// struct sockaddr_in *addr_in = (struct sockaddr_in *)clientptr;
+		// char *s = inet_ntoa(addr_in->sin_addr);
+
+  //   	client_info.fd = newsock;
+  //   	client_info.IP = malloc(sizeof(char)* (strlen(s) + 1));
+  //   	strcpy(client_info.IP, s);
+  //   	place(client_info);
+  //   	// print_pool();
+
+  //   	printf("Accepted connection from %s\n", s);
+		// // print_worker_list(worker_info_head);
+
+  //   }
+
 
 
 
