@@ -288,8 +288,8 @@ int main(int argc, char *argv[])
     
     
     Client_info client_info;
-    printf("Listening for connections to statisticsPortNum %d, %d\n", statisticsPortNum, server.sin_addr.s_addr);
-    printf("Listening for connections to queryPortNum %d, %d\n", queryPortNum, server.sin_addr.s_addr);
+    printf("Listening for connections to statisticsPortNum %d\n", statisticsPortNum);
+    printf("Listening for connections to queryPortNum %d\n", queryPortNum);
 
     Socket_info socket_info[MAX_FD];
     while (1){
@@ -334,8 +334,10 @@ int main(int argc, char *argv[])
     }
 
 
-
+    for (int i = 0; i < numThreads; ++i)
+	{
+		pthread_join(thr[i], NULL);
+	}
 
 	return 0;
-
 }

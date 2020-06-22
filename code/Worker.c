@@ -98,12 +98,7 @@ int main(int argc, char *argv[])
 		perror("error opening writing pipe in worker\n");
 		return -1;
 	}
-	// // error checking for fcntl 
-	// if (fcntl(fifosR[i], F_SETFL, O_NONBLOCK) < 0) {
-	// 	perror("fnctl fifoR");
-	// 	return -1; 
-	// }
-	// printf("KALISPERA\n");
+
 	char *stats = malloc(sizeof(char) *1000000);
 	int diseaseHashNum = 7;
 	int countryHashNum = 7;
@@ -150,6 +145,7 @@ int main(int argc, char *argv[])
 	    	break;
 	    }
 	    // printf("Received: %s  ----  bytesread: %d -----pid: %d\n", buffer, bytesread, getpid());
+	    // printf("%s\n", buffer);
 		append_path_list(&path_head, buffer);
 
 		// sleep(1);
@@ -195,12 +191,6 @@ int main(int argc, char *argv[])
     if (listen(sock, 5) < 0) perror_exit("listen");
 
 
-
-
-
-
-
-
     sprintf(stats, "w@%d$", port);
 
     // printf("stats--- %s\n", stats);
@@ -213,28 +203,26 @@ int main(int argc, char *argv[])
 	}
 
 
-	// printf("STATS APO WORKER %d\n", getpid());
-	// printf("%s\n", stats);
-	// printf("telos %d\n", getpid());
-	//write to server all stats at once
-
-
+	// print_path_list(path_head);
 	paths_list_node *cur1 = path_head;
 	while(cur1 != NULL){
 		// printf("%s\n", cur1->path);
-		char * token = strtok(cur1->path, "/");
+		char path[30];
+		strcpy(path,cur1->path);
+		char * token = strtok(path, "/");
 		token = strtok(NULL, " ");
 		sprintf(stats, "%s#%s", stats, token);
 		cur1 = cur1->next;
 	}
 
+	// print_path_list(path_head);
 	sprintf(stats, "%s&", stats);
 	// printf("stats-->%s\n", stats);
 
 	connecttoserver(serverIP, serverPort, stats);
 	
 
-	printf("Listening for connections to port %d, %d\n", port, server.sin_addr.s_addr);
+	printf("Listening for connections to port %d\n", port);
     while (1) {
         /* accept connection */
     	if ((newsock = accept(sock, clientptr, &clientlen)) < 0) perror_exit("accept");
@@ -256,12 +244,6 @@ int main(int argc, char *argv[])
     }
 
 
-
-
-
-
-
-	/* blocking pipe*/
 
 
     // print_list(head);

@@ -2,7 +2,48 @@
 /numPatientAdmissions COVID-2019 21-4-2015 3-1-2019 Greece
 /searchPatientRecord 17
 /searchPatientRecord 11
+/numPatientDischarges COVID-2019 21-4-2015 3-1-2019 Greece
+/numPatientDischarges COVID-2019 20-6-2018 3-1-2020 China
+/numPatientDischarges COVID-2019 25-5-2015 3-1-2022 
 /searchPatientRecord 308
 /searchPatientRecord 348
 /searchPatientRecord 220
-/searchPatientRecord 10
+/topk-AgeRanges 3 Italy SARS-1 1-2-2000 1
+/numPatientAdmissions COVID-2019 21-4-2015 3-1-2019 
+/numPatientAdmissions COVID-2019 21-4-2015 3-1-2019 Greece
+/searchPatientRecord 17
+/searchPatientRecord 11
+/numPatientDischarges COVID-2019 21-4-2015 3-1-2019 Greece
+/numPatientDischarges COVID-2019 20-6-2018 3-1-2020 China
+/numPatientDischarges COVID-2019 25-5-2015 3-1-2022 
+/searchPatientRecord 308
+/searchPatientRecord 145
+/searchPatientRecord 220
+/topk-AgeRanges 3 Italy SARS-1 1-2-2000 1
+/numPatientAdmissions COVID-2019 21-4-2015 3-1-2019 
+/numPatientAdmissions COVID-2019 21-4-2015 3-1-2019 Greece
+/searchPatientRecord 17
+/searchPatientRecord 11
+/numPatientDischarges COVID-2019 21-4-2015 3-1-2019 Greece
+/numPatientDischarges COVID-2019 20-6-2018 3-1-2020 China
+/numPatientDischarges COVID-2019 25-5-2015 3-1-2022 
+/searchPatientRecord 6
+/searchPatientRecord 348
+/searchPatientRecord 123
+/topk-AgeRanges 3 Italy SARS-1 1-2-2000 1
+/searchPatientRecord 220
+/topk-AgeRanges 3 Italy SARS-1 1-2-2000 1
+/numPatientAdmissions COVID-2019 21-4-2015 3-1-2019 
+/numPatientAdmissions COVID-2019 21-4-2015 3-1-2019 Greece
+/searchPatientRecord 17
+/searchPatientRecord 11
+/numPatientDischarges COVID-2019 21-4-2015 3-1-2019 Greece
+/numPatientDischarges COVID-2019 20-6-2018 3-1-2020 China
+/numPatientDischarges COVID-2019 25-5-2015 3-1-2022 
+/searchPatientRecord 400
+/searchPatientRecord 17
+/searchPatientRecord 123
+/topk-AgeRanges 3 Italy SARS-1 1-2-2000 1
+/diseaseFrequency MERS_COV 1-2-2015 5-1-2021
+
+

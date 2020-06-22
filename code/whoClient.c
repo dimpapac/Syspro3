@@ -47,7 +47,10 @@ void *send_line(void *line){
 	pthread_mutex_unlock(&mtx);
 
 	char * ret = connectToServerWithResponse(servIP, servPort, (char *)line);
-	printf("%s\n", ret);
+	pthread_mutex_lock(&mtx_print);
+	printf("%s\n", (char *)line);
+	printf("%s\n\n", ret);
+	pthread_mutex_unlock(&mtx_print);
 	free(ret);
 	return NULL;
 }
@@ -98,7 +101,7 @@ int main(int argc, char *argv[])
 	}
 
 	// printf("%s %d %d %s\n", queryFileName, numThreads, servPort, servIP);
-
+	if (numThreads);
 	flag = 0;
 
     char * line = NULL;
@@ -155,5 +158,12 @@ int main(int argc, char *argv[])
 	}
 
 
+	free(queryFileName);
+	free(servIP);
+	for (int i = 0; i < numoflines; ++i)
+	{
+		free(queries[i]);
+	}
+	free(queries);
 	return 0;
 }

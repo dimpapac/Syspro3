@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	printf("%d %d %s %d %s\n", numWorkers, bufferSize, serverIP, serverPort, input_dir);
+	// printf("%d %d %s %d %s\n", numWorkers, bufferSize, serverIP, serverPort, input_dir);
 
 	char **readFifosNames = malloc(sizeof(char *) * numWorkers); //hold names of pipes for reading 
 	char **writeFifosNames = malloc(sizeof(char *) * numWorkers); //hold names of pipes for writing
@@ -318,7 +318,6 @@ int main(int argc, char *argv[])
 		}	
 	}
 	
-	// getchar();
 	while(pflag==0);
 	// char *logfile = malloc(sizeof(char) * (strlen("log_file.") + 10));
 

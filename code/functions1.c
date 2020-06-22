@@ -913,10 +913,9 @@ char  *frequencyWithCountryNPAD(bucket **HashTable, int HashNum, char *date1, ch
 	int hashValue = hash2(country, HashNum);
 
 	if (HashTable[hashValue] == NULL){
-		// printf("HashTable[hashValue] == NULL\n");
+		printf("HashTable[hashValue] == NULL\n");
 		return NULL;
 	}
-
 	for (int j = 0; j < HashTable[hashValue]->currentNumberOfEntries; j++)
 	{
 	 	// printf("Disease name: %s ", HashTable[hashValue]->entries[j].nameOfdiseaseORc);
