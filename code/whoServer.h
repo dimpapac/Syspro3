@@ -38,7 +38,6 @@ typedef struct {
 void initialize(); 
 void place(Client_info client_info); 
 Client_info obtain(); 
-void * producer(void * ptr);
 void * consumer();
 void reset_socket_info(Socket_info *socket_info, int stats_sock, int query_sock);
 int checkFlags(Socket_info *socket_info);

@@ -43,587 +43,537 @@ void listCountries(paths_list_node **list_head, int *pids, int numWorkers){
 }
 
 
-int find_worker_with_country(paths_list_node **list_head, int numWorkers, char *country){
-	for (int i = 0; i < numWorkers; i++)
-	{
-		paths_list_node * cur = list_head[i];
-		while(cur != NULL){
-			if (strcmp(cur->path, country) == 0)
+worker_info *find_worker_with_country(worker_info *list_head, char *country){
+	worker_info *cur = list_head;
+	while(cur != NULL){
+		for (int i = 0; i < cur->counter; ++i)
+		{
+			if (strcmp(cur->countries[i], country) == 0)
 			{
-				return i;
+				return cur;
 			}
+		}
+		cur = cur->next;
+	}
+	return NULL;
+}
+
+// void write_line(paths_list_node **list_head, int *pids, int numWorkers, int *fifosR, int *fifosW, char *send_line, int flag){
+// 	if (flag == 0) //send to every child
+// 	{
+// 		for (int i = 0; i < numWorkers; i++)
+// 		{
+// 			int size = (int) strlen(send_line) + 1;
+//             // printf("sizeOfMessage dA  -- %d\n", size);
+//            	//write size of message 
+//            	if (write(fifosW[i], &size, sizeof(int)) == -1){ 
+// 				perror("write");
+// 				// return -1;
+// 			}
+// 			// sleep(1);
+
+// 			// // write message
+//             if (write(fifosW[i], send_line, size) == -1){ 
+// 				perror("write");
+// 				// return -1;
+// 			}
+// 		}
+// 	}
+// 	else if(flag == 1) //send to 1 child
+// 	{
+// 		// printf("/diseaseFrequency write line \n");
+// 		char *temp_line = malloc((strlen(send_line) + 1) * sizeof(char));
+// 		strcpy(temp_line, send_line);
+// 		char *token = strtok(temp_line," ");
+// 		token = strtok(NULL, " ");
+// 		token = strtok(NULL, " ");
+// 		token = strtok(NULL, " ");
+// 		token = strtok(NULL, " ");
+// 		int position = find_worker_with_country(list_head, numWorkers, token);
+// 		if (position == -1)
+// 		{
+// 			printf("country not exists\n");
+// 			free(temp_line);
+// 			return;
+// 		}
+// 		else{
+// 			// printf("POSITION %d\n", position);
+// 			int size = (int) strlen(send_line) + 1;
+//             // printf("sizeOfMessage dA  -- %d\n", size);
+//            	//write size of message 
+//            	if (write(fifosW[position], &size, sizeof(int)) == -1){ 
+// 				perror("write");
+// 				// return -1;
+// 			}
+// 			// sleep(1);
+
+// 			// // write message
+//             if (write(fifosW[position], send_line, size) == -1){ 
+// 				perror("write");
+// 				// return -1;
+// 			}
+// 		}
+// 		free(temp_line);
+// 	}
+
+// }
+
+
+
+// void read_answer(paths_list_node **list_head, int *pids, int numWorkers, int *fifosR, int *fifosW, char *send_line, int flag){
+// 	if (flag == 0) // no country
+// 	{
+// 		int counter = 0;
+// 		for (int i = 0; i < numWorkers; i++) //read from all workers
+// 		{
+// 			int returnValue = 0; 
+// 			while (read(fifosR[i], &returnValue, sizeof(int)) < 0){ 
+// 		   		// if (errno == EAGAIN) { 
+// 			    //     printf("(pipe empty)\n"); 
+// 			    //     sleep(1);
+// 			    //     // break; 
+// 			    // }
+// 			    // printf("PAMELIGO\n");
+// 			}
+// 	    	counter += returnValue;
+// 		}
+// 		// printf("COUNTER IN READ_ANSER: %d\n", counter);
+// 		printf("%d\n", counter);
+// 	}
+// 	else if(flag == 1) //country 
+// 	{
+// 		// printf("/diseaseFrequency write line \n");
+// 		char *temp_line = malloc((strlen(send_line) + 1) * sizeof(char));
+// 		strcpy(temp_line, send_line);
+// 		char *token = strtok(temp_line," "); // npa
+// 		token = strtok(NULL, " "); //disease
+// 		token = strtok(NULL," "); //date1
+// 		token = strtok(NULL," "); //date2
+// 		token = strtok(NULL," "); // country
+// 		int position = find_worker_with_country(list_head, numWorkers, token);
+// 		if (position == -1)
+// 		{
+// 			printf("country not exists\n");
+// 		}
+// 		else{
+// 			// printf("POSITION %d\n", position);
+// 			int returnValue = 0; 
+// 			while (read(fifosR[position], &returnValue, sizeof(int)) < 0){ 
+// 		   		// if (errno == EAGAIN) { 
+// 			    //     printf("(pipe empty)\n"); 
+// 			    //     sleep(1);
+// 			    //     // break; 
+// 			    // }
+// 			    // printf("PAMELIGO\n");
+// 			}
+// 			// printf("returnValue IN READ_ANSER: %d\n", returnValue);
+// 			printf("%d\n", returnValue);
+// 		}
+		
+// 		free(temp_line);
+// 	}
+
+// }
+
+
+
+
+// void read_answer_string(paths_list_node **list_head, int *pids, int numWorkers, int *fifosR, int *fifosW, char *send_line, int flag){
+// 	if (flag == 0) // no country
+// 	{
+// 		for (int i = 0; i < numWorkers; i++) //read from all workers
+// 		{
+// 			while(1){
+// 				int size = 0; 
+// 				while (read(fifosR[i], &size, sizeof(int)) < 0){ 
+// 			   		// if (errno == EAGAIN) { 
+// 				    //     printf("(pipe empty)\n"); 
+// 				    //     sleep(1);
+// 				    //     // break; 
+// 				    // }
+// 				    // printf("PAMELIGO\n");
+// 				}
+
+// 				if (size == 0)
+// 				{
+// 					printf("no outbreaks read_answer_string\n");
+// 				}
+
+// 				if (size == -13)
+// 		    	{
+// 		    		break;
+// 		    	}
+
+// 				char *buffer = malloc(sizeof(char) * (size + 1));
+// 				while (read(fifosR[i], buffer, size) < 0){ 
+// 			   		// if (errno == EAGAIN) { 
+// 				    //     printf("(pipe empty)\n"); 
+// 				    //     sleep(1);
+// 				    //     // break; 
+// 				    // }
+// 				    // printf("PAMELIGO\n");
+// 				}
+// 				buffer[size] = '\0';
+// 				printf("%s\n", buffer);
+// 				free(buffer);
+// 			}
+
+// 		}
+// 		// printf("COUNTER IN READ_ANSER: %d\n", counter);
+// 		// printf("%d\n", counter);
+// 	}
+// 	else if(flag == 1) //country 
+// 	{
+// 		// printf("/diseaseFrequency write line \n");
+// 		char *temp_line = malloc((strlen(send_line) + 1) * sizeof(char));
+// 		strcpy(temp_line, send_line);
+// 		char *token = strtok(temp_line," "); // npa
+// 		token = strtok(NULL, " "); //disease
+// 		token = strtok(NULL," "); //date1
+// 		token = strtok(NULL," "); //date2
+// 		token = strtok(NULL," "); // country
+// 		int position = find_worker_with_country(list_head, numWorkers, token);
+// 		if (position == -1)
+// 		{
+// 			printf("country not exists\n");
+// 		}
+// 		else{
+// 			// printf("POSITION %d\n", position);
+// 			int size = 0; 
+// 			while (read(fifosR[position], &size, sizeof(int)) < 0){ 
+// 		   		// if (errno == EAGAIN) { 
+// 			    //     printf("(pipe empty)\n"); 
+// 			    //     sleep(1);
+// 			    //     // break; 
+// 			    // }
+// 			    // printf("PAMELIGO\n");
+// 			}
+
+// 			if (size == 0)
+// 			{
+// 				printf("no outbreaks read_answer_string\n");
+// 			}
+
+// 			char *buffer = malloc(sizeof(char) * (size + 1));
+// 			while (read(fifosR[position], buffer, size) < 0){ 
+// 		   		// if (errno == EAGAIN) { 
+// 			    //     printf("(pipe empty)\n"); 
+// 			    //     sleep(1);
+// 			    //     // break; 
+// 			    // }
+// 			    // printf("PAMELIGO\n");
+// 			}
+// 			buffer[size] = '\0';
+// 			printf("%s\n", buffer);
+// 			free(buffer);
+// 		}
+// 		free(temp_line);
+// 	}
+
+// }
+
+
+
+void send_request(worker_info *list_head, int fd, char *command){
+
+
+	// char *command = NULL;
+	
+	if (strncmp(command, "/diseaseFrequency", strlen("/diseaseFrequency")) == 0 || strncmp(command, "df", strlen("df")) == 0) {
+		// printf("/diseaseFrequency\n");
+		// char *send_line = malloc((strlen(command) + 1) * sizeof(char));
+		// strcpy(send_line, command);
+		// int flag = 0;
+
+		// char *token = strtok(command," ");
+		// // if (token == NULL) continue;
+		// // printf("%s\n", token);
+		// char *virusName = strtok(NULL, " ");
+		// if (virusName == NULL) {
+		// 	printf("Usage:  /diseaseFrequency virusName date1 date2 [country] \n");
+		// 	free(send_line);
+		// 	// continue;
+		// }// printf("%s\n", virusName);
+
+		// char *date1 = strtok(NULL," ");
+		// if (date1 == NULL){
+		// 	printf("Usage:  /diseaseFrequency virusName date1 date2 [country] \n");
+		// 	free(send_line);
+		// 	// continue;
+		// }
+
+		// char *date2 = strtok(NULL," ");
+		// if (date2 == NULL){
+		// 	printf("Usage: /diseaseFrequency virusName date1 date2 [country] \n");
+		// 	free(send_line);
+		// 	// continue;
+		// }
+
+		// char *country = strtok(NULL," ");
+		// if (country == NULL)
+		// {
+		// 	// printf("no country \n");
+		// 	// printf("send_line  %s\n", send_line);
+		// 	// write_line(list_head, pids, numWorkers, fifosR, fifosW, send_line, flag);
+		// 	// read_answer(list_head, pids, numWorkers, fifosR, fifosW, send_line, flag);
+		// }
+		// else
+		// {
+		// 	flag = 1;
+		// 	// printf("country: %s\n", country);
+
+		// 	// write_line(list_head, pids, numWorkers, fifosR, fifosW, send_line, flag);
+		// 	// read_answer(list_head, pids, numWorkers, fifosR, fifosW, send_line, flag);
+
+		// }
+
+		// free(send_line);
+
+	} else if (strncmp(command, "/topk-AgeRanges", strlen("/topk-AgeRanges")) == 0 || strncmp(command, "topk", strlen("topk")) == 0) {
+		// printf("/topk-AgeRanges\n");
+		// printf("Not implemented\n");
+		// // continue;
+		// char *token = strtok(command," "); //topk
+		// // if (token == NULL) continue;
+		// char *ks = strtok(NULL, " ");
+		// if (ks == NULL){
+		// 	printf("Usage: /topk-AgeRanges k country disease date1 date2\n");
+		// 	// continue;
+		// }
+		// int k = atoi(ks);
+		// if (k == 0)
+		// {
+		// 	printf("k must be a number\n");
+		// 	// continue;
+		// }
+		// char *country = strtok(NULL, " ");
+		// if (country == NULL){
+		// 	printf("yUsage: /topk-AgeRanges k country disease date1 date2\n");
+		// 	// continue;
+		// }
+		// char *disease = strtok(NULL, " ");
+		// if (disease == NULL){
+		// 	printf("Usage: /topk-AgeRanges k country disease date1 date2\n");
+		// 	// continue;
+		// }
+		// char *date1 = strtok(NULL, " ");
+		// if (date1 == NULL) //no dates given
+		// {
+		// 	// printf("no dates\n");
+		// 	// date nodate; //NULL 
+		// 	// topk(countryHashTable, countryHashNum, k, country, 0, nodate, nodate);
+		// }
+		// else
+		// {
+		// 	// printf("%s\n", date1);
+		// 	char *date2 = strtok(NULL," ");
+		// 	if (date2 == NULL){
+		// 		printf("you have to give two dates\n");
+		// 		// continue;
+		// 	}
+		// 	else {
+		// 		// date idate1, idate2;
+		// 		// if (charToDate(date1, &idate1) != 0 || charToDate(date2, &idate2) != 0 || earlier(&idate2, &idate1) == 1)
+		// 		// {
+		// 		// 	printf("wrong dates\n");
+		// 			continue;
+		// 		// }
+				
+		// 		// topk(countryHashTable, countryHashNum, k, country, 2, idate1, idate2);
+		// 	}
+		// }
+
+
+	} else if (strncmp(command, "/searchPatientRecord", strlen("/searchPatientRecord")) == 0 || strncmp(command, "spr", strlen("spr")) == 0) {
+		printf("searchPatientRecord\n");
+		char *send_line = malloc((strlen(command) + 1) * sizeof(char));
+		strcpy(send_line, command);
+		char *recordID = strtok(command," ");
+		// int flag = 0;
+		// char *exitDate;
+		recordID = strtok(NULL, " ");
+		if (recordID == NULL){
+			printf("no recordID given\n");
+			free(recordID);
+			free(send_line);
+			// continue;
+		}
+		// write_line(list_head, pids, numWorkers, fifosR, fifosW, send_line, flag);
+
+		// int counter = 0;
+		// for (int i = 0; i < numWorkers; i++) //read from all workers
+		// {
+			
+		// 	int size = 0; 
+		// 	while (read(fifosR[i], &size, sizeof(int)) < 0){ 
+		//    		// if (errno == EAGAIN) { 
+		// 	    //     printf("(pipe empty)\n"); 
+		// 	    //     sleep(1);
+		// 	    //     // break; 
+		// 	    // }
+		// 	    // printf("PAMELIGO\n");
+		// 	}
+
+		// 	if (size == 0)
+		// 	{	
+		// 		counter++;
+		// 		// continue;
+		// 	}
+
+		// 	char *buffer = malloc(sizeof(char) * (size + 1));
+		// 	while (read(fifosR[i], buffer, size) < 0){ 
+		//    		// if (errno == EAGAIN) { 
+		// 	    //     printf("(pipe empty)\n"); 
+		// 	    //     sleep(1);
+		// 	    //     // break; 
+		// 	    // }
+		// 	    // printf("PAMELIGO\n");
+		// 	}
+		// 	buffer[size] = '\0';
+		// 	printf("%s\n", buffer);
+		
+
+		// 	free(buffer);
+
+		// }
+
+		char *response = NULL;
+		char total_response[500];
+		worker_info *cur = list_head;
+		while(cur != NULL){
+			response = connectToServerWithResponse(cur->IP, cur->fd, send_line);
+			sprintf(total_response, "%s%s", total_response, response);
 			cur = cur->next;
 		}
-	}
-	return -1;
-}
+		// mtx_lock
+		printf("%s\n", total_response);
+		// mtx_unlock
+		write(fd, total_response, 500);
 
-void write_line(paths_list_node **list_head, int *pids, int numWorkers, int *fifosR, int *fifosW, char *send_line, int flag){
-	if (flag == 0) //send to every child
-	{
-		for (int i = 0; i < numWorkers; i++)
+		// if (counter == numWorkers)
+		// {
+		// 	printf("recordID not found\n");
+		// }
+
+		free(send_line);
+
+	} else if (strncmp(command, "/numPatientAdmissions", strlen("/numPatientAdmissions")) == 0 || strncmp(command, "npa", strlen("npa")) == 0) {
+		// printf("/numPatientAdmissions\n");
+		char *send_line = malloc((strlen(command) + 1) * sizeof(char));
+		strcpy(send_line, command);
+		char *token = strtok(command," ");
+
+		if (token == NULL) {
+			printf("Usage: /numPatientAdmissions disease date1 date2 [country] \n");
+			free(send_line);
+		}
+		// printf("%s\n", token);
+		char *virusName = strtok(NULL, " ");
+		if (virusName == NULL) {
+			printf("Usage: /numPatientAdmissions disease date1 date2 [country] \n");
+			free(send_line);
+			// continue;
+		}// printf("%s\n", virusName);
+
+		char *date1 = strtok(NULL," ");
+		if (date1 == NULL){
+			printf("Usage: /numPatientAdmissions disease date1 date2 [country] \n");
+			free(send_line);
+			// continue;
+		}
+
+		char *date2 = strtok(NULL," ");
+		if (date2 == NULL){
+			printf("Usage: /numPatientAdmissions disease date1 date2 [country] \n");
+			free(send_line);
+			// continue;
+		}
+
+		char *country = strtok(NULL,"\n");
+		printf("country %s\n", country);
+		if (country == NULL)
 		{
-			int size = (int) strlen(send_line) + 1;
-            // printf("sizeOfMessage dA  -- %d\n", size);
-           	//write size of message 
-           	if (write(fifosW[i], &size, sizeof(int)) == -1){ 
-				perror("write");
-				// return -1;
+			char *response = NULL;
+			char total_response[500];
+			worker_info *cur = list_head;
+			while(cur != NULL){
+				response = connectToServerWithResponse(cur->IP, cur->fd, send_line);
+				sprintf(total_response, "%s%s", total_response, response);
+				cur = cur->next;
 			}
-			// sleep(1);
-
-			// // write message
-            if (write(fifosW[i], send_line, size) == -1){ 
-				perror("write");
-				// return -1;
-			}
+			// mtx_lock
+			printf("%s\n", total_response);
+			// mtx_unlock
+			write(fd, total_response, 500);
 		}
-	}
-	else if(flag == 1) //send to 1 child
-	{
-		// printf("/diseaseFrequency write line \n");
-		char *temp_line = malloc((strlen(send_line) + 1) * sizeof(char));
-		strcpy(temp_line, send_line);
-		char *token = strtok(temp_line," ");
-		token = strtok(NULL, " ");
-		token = strtok(NULL, " ");
-		token = strtok(NULL, " ");
-		token = strtok(NULL, " ");
-		int position = find_worker_with_country(list_head, numWorkers, token);
-		if (position == -1)
+		else
 		{
-			printf("country not exists\n");
-			free(temp_line);
-			return;
-		}
-		else{
-			// printf("POSITION %d\n", position);
-			int size = (int) strlen(send_line) + 1;
-            // printf("sizeOfMessage dA  -- %d\n", size);
-           	//write size of message 
-           	if (write(fifosW[position], &size, sizeof(int)) == -1){ 
-				perror("write");
-				// return -1;
+			char *response = NULL;
+			worker_info *node = find_worker_with_country(list_head, country);
+			if (node == NULL){
+				write(fd, "Wrong country", 500);
 			}
-			// sleep(1);
-
-			// // write message
-            if (write(fifosW[position], send_line, size) == -1){ 
-				perror("write");
-				// return -1;
+			else {
+				response = connectToServerWithResponse(node->IP, node->fd, send_line);
+				write(fd, response, 500);
 			}
-		}
-		free(temp_line);
-	}
 
-}
-
-
-
-void read_answer(paths_list_node **list_head, int *pids, int numWorkers, int *fifosR, int *fifosW, char *send_line, int flag){
-	if (flag == 0) // no country
-	{
-		int counter = 0;
-		for (int i = 0; i < numWorkers; i++) //read from all workers
-		{
-			int returnValue = 0; 
-			while (read(fifosR[i], &returnValue, sizeof(int)) < 0){ 
-		   		// if (errno == EAGAIN) { 
-			    //     printf("(pipe empty)\n"); 
-			    //     sleep(1);
-			    //     // break; 
-			    // }
-			    // printf("PAMELIGO\n");
-			}
-	    	counter += returnValue;
 		}
-		// printf("COUNTER IN READ_ANSER: %d\n", counter);
-		printf("%d\n", counter);
-	}
-	else if(flag == 1) //country 
-	{
-		// printf("/diseaseFrequency write line \n");
-		char *temp_line = malloc((strlen(send_line) + 1) * sizeof(char));
-		strcpy(temp_line, send_line);
-		char *token = strtok(temp_line," "); // npa
-		token = strtok(NULL, " "); //disease
-		token = strtok(NULL," "); //date1
-		token = strtok(NULL," "); //date2
-		token = strtok(NULL," "); // country
-		int position = find_worker_with_country(list_head, numWorkers, token);
-		if (position == -1)
-		{
-			printf("country not exists\n");
-		}
-		else{
-			// printf("POSITION %d\n", position);
-			int returnValue = 0; 
-			while (read(fifosR[position], &returnValue, sizeof(int)) < 0){ 
-		   		// if (errno == EAGAIN) { 
-			    //     printf("(pipe empty)\n"); 
-			    //     sleep(1);
-			    //     // break; 
-			    // }
-			    // printf("PAMELIGO\n");
-			}
-			// printf("returnValue IN READ_ANSER: %d\n", returnValue);
-			printf("%d\n", returnValue);
-		}
+
+		free(send_line);
+
+	} else if (strncmp(command, "/numPatientDischarges", strlen("/numPatientDischarges")) == 0 || strncmp(command, "npd", strlen("npd")) == 0) {
+		// printf("/numPatientDischarges\n");
+		// char *send_line = malloc((strlen(command) + 1) * sizeof(char));
+		// strcpy(send_line, command);
+		// char *token = strtok(command," ");
+		// int flag = 0;
+		// // if (token == NULL) continue;
+		// // printf("%s\n", token);
+		// char *disease = strtok(NULL, " ");
+		// if (disease == NULL) {
+		// 	printf("Usage: /numPatientDischarges disease date1 date2 [country] \n");
+		// 	// continue;
+		// 	free(send_line);
+		// }// printf("%s\n", disease);
+
+		// char *date1 = strtok(NULL," ");
+		// if (date1 == NULL){
+		// 	printf("Usage: /numPatientDischarges disease date1 date2 [country] \n");
+		// 	// continue;
+		// 	free(send_line);
+		// }
+
+		// char *date2 = strtok(NULL," ");
+		// if (date2 == NULL){
+		// 	printf("Usage: /numPatientDischarges disease date1 date2 [country] \n");
+		// 	// continue;
+		// 	free(send_line);
+		// }
+
+		// char *country = strtok(NULL," ");
+		// if (country == NULL)
+		// {
+		// 	// printf("no country \n");
+		// 	// frequency(diseaseHashTable, diseaseHashNum, date1, date2, disease);
+		// 	// write_line(list_head, pids, numWorkers, fifosR, fifosW, send_line, flag);
+		// 	// read_answer_string(list_head, pids, numWorkers, fifosR, fifosW, send_line, flag);
+
+		// }
+		// else
+		// {
+		// 	flag = 1;
+		// 	// printf("country: %s\n", country);
+		// 	// frequencyWithCountry(countryHashTable, countryHashNum, date1, date2, disease, country);
+		// 	// write_line(list_head, pids, numWorkers, fifosR, fifosW, send_line, flag);
+		// 	// read_answer_string(list_head, pids, numWorkers, fifosR, fifosW, send_line, flag);
+
+		// }	
 		
-		free(temp_line);
+		// free(send_line);
+
 	}
 
-}
-
-
-
-
-void read_answer_string(paths_list_node **list_head, int *pids, int numWorkers, int *fifosR, int *fifosW, char *send_line, int flag){
-	if (flag == 0) // no country
-	{
-		for (int i = 0; i < numWorkers; i++) //read from all workers
-		{
-			while(1){
-				int size = 0; 
-				while (read(fifosR[i], &size, sizeof(int)) < 0){ 
-			   		// if (errno == EAGAIN) { 
-				    //     printf("(pipe empty)\n"); 
-				    //     sleep(1);
-				    //     // break; 
-				    // }
-				    // printf("PAMELIGO\n");
-				}
-
-				if (size == 0)
-				{
-					printf("no outbreaks read_answer_string\n");
-				}
-
-				if (size == -13)
-		    	{
-		    		break;
-		    	}
-
-				char *buffer = malloc(sizeof(char) * (size + 1));
-				while (read(fifosR[i], buffer, size) < 0){ 
-			   		// if (errno == EAGAIN) { 
-				    //     printf("(pipe empty)\n"); 
-				    //     sleep(1);
-				    //     // break; 
-				    // }
-				    // printf("PAMELIGO\n");
-				}
-				buffer[size] = '\0';
-				printf("%s\n", buffer);
-				free(buffer);
-			}
-
-		}
-		// printf("COUNTER IN READ_ANSER: %d\n", counter);
-		// printf("%d\n", counter);
-	}
-	else if(flag == 1) //country 
-	{
-		// printf("/diseaseFrequency write line \n");
-		char *temp_line = malloc((strlen(send_line) + 1) * sizeof(char));
-		strcpy(temp_line, send_line);
-		char *token = strtok(temp_line," "); // npa
-		token = strtok(NULL, " "); //disease
-		token = strtok(NULL," "); //date1
-		token = strtok(NULL," "); //date2
-		token = strtok(NULL," "); // country
-		int position = find_worker_with_country(list_head, numWorkers, token);
-		if (position == -1)
-		{
-			printf("country not exists\n");
-		}
-		else{
-			// printf("POSITION %d\n", position);
-			int size = 0; 
-			while (read(fifosR[position], &size, sizeof(int)) < 0){ 
-		   		// if (errno == EAGAIN) { 
-			    //     printf("(pipe empty)\n"); 
-			    //     sleep(1);
-			    //     // break; 
-			    // }
-			    // printf("PAMELIGO\n");
-			}
-
-			if (size == 0)
-			{
-				printf("no outbreaks read_answer_string\n");
-			}
-
-			char *buffer = malloc(sizeof(char) * (size + 1));
-			while (read(fifosR[position], buffer, size) < 0){ 
-		   		// if (errno == EAGAIN) { 
-			    //     printf("(pipe empty)\n"); 
-			    //     sleep(1);
-			    //     // break; 
-			    // }
-			    // printf("PAMELIGO\n");
-			}
-			buffer[size] = '\0';
-			printf("%s\n", buffer);
-			free(buffer);
-		}
-		free(temp_line);
-	}
-
-}
-
-
-
-void cli(paths_list_node **list_head, int *pids, int numWorkers, int *fifosR, int *fifosW){
-
-	ssize_t lineSize;
-
-	//command line interface 
-	size_t n;
-	char *command = NULL;
-	do {
-		if (command != NULL)
-			free(command);
-		command = NULL;
-		printf(">");
-		if (pflag == 1)
-		{
-			break;
-		}
-		// printf("FLAG META DO %d\n", pflag);
-		lineSize = getline(&command, &n, stdin); //get line from stdin
-		command[lineSize - 1] = '\0';
-		// printf("COMMAND: %s\n", command); 
-/*1*/	if (strncmp(command, "/listCountries", strlen("/listCountries")) == 0 || strncmp(command, "lc", strlen("lc")) == 0) {
-			// printf("/listCountries\n");
-			
-			listCountries(list_head, pids, numWorkers);
-			ptotal++;
-			psuccess++;
-
-/*2*/	} else if (strncmp(command, "/diseaseFrequency", strlen("/diseaseFrequency")) == 0 || strncmp(command, "df", strlen("df")) == 0) {
-			// printf("/diseaseFrequency\n");
-			char *send_line = malloc((strlen(command) + 1) * sizeof(char));
-			strcpy(send_line, command);
-			int flag = 0;
-
-			char *token = strtok(command," ");
-			if (token == NULL) continue;
-    		// printf("%s\n", token);
-    		char *virusName = strtok(NULL, " ");
-    		if (virusName == NULL) {
-    			printf("Usage:  /diseaseFrequency virusName date1 date2 [country] \n");
-    			ptotal++;
-    			pfail++;
-    			free(send_line);
-    			continue;
-			}// printf("%s\n", virusName);
-
-			char *date1 = strtok(NULL," ");
-			if (date1 == NULL){
-				printf("Usage:  /diseaseFrequency virusName date1 date2 [country] \n");
-    			ptotal++;
-    			pfail++;
-    			free(send_line);
-				continue;
-			}
-
-			char *date2 = strtok(NULL," ");
-			if (date2 == NULL){
-				printf("Usage: /diseaseFrequency virusName date1 date2 [country] \n");
-				ptotal++;
-				pfail++;
-				free(send_line);
-				continue;
-			}
-
-			char *country = strtok(NULL," ");
-			if (country == NULL)
-			{
-				// printf("no country \n");
-				// printf("send_line  %s\n", send_line);
-				write_line(list_head, pids, numWorkers, fifosR, fifosW, send_line, flag);
-				read_answer(list_head, pids, numWorkers, fifosR, fifosW, send_line, flag);
-			}
-			else
-			{
-				flag = 1;
-				// printf("country: %s\n", country);
-
-				write_line(list_head, pids, numWorkers, fifosR, fifosW, send_line, flag);
-				read_answer(list_head, pids, numWorkers, fifosR, fifosW, send_line, flag);
-
-			}
-
-			ptotal++;
-			psuccess++;
-			free(send_line);
-
-/*3*/	} else if (strncmp(command, "/topk-AgeRanges", strlen("/topk-AgeRanges")) == 0 || strncmp(command, "topk", strlen("topk")) == 0) {
-			// printf("/topk-AgeRanges\n");
-			printf("Not implemented\n");
-			continue;
-			char *token = strtok(command," "); //topk
-			if (token == NULL) continue;
-    		char *ks = strtok(NULL, " ");
-    		if (ks == NULL){
-    			printf("Usage: /topk-AgeRanges k country disease date1 date2\n");
-    			ptotal++;
-    			pfail++;
-    			continue;
-    		}
-    		int k = atoi(ks);
-    		if (k == 0)
-    		{
-    			printf("k must be a number\n");
-    			ptotal++;
-    			pfail++;
-    			continue;
-    		}
-    		char *country = strtok(NULL, " ");
-    		if (country == NULL){
-    			printf("yUsage: /topk-AgeRanges k country disease date1 date2\n");
-    			ptotal++;
-    			pfail++;
-    			continue;
-    		}
-    		char *disease = strtok(NULL, " ");
-    		if (disease == NULL){
-    			printf("Usage: /topk-AgeRanges k country disease date1 date2\n");
-    			ptotal++;
-    			pfail++;
-    			continue;
-    		}
-    		char *date1 = strtok(NULL, " ");
-			if (date1 == NULL) //no dates given
-			{
-				// printf("no dates\n");
-				// date nodate; //NULL 
-				// topk(countryHashTable, countryHashNum, k, country, 0, nodate, nodate);
-			}
-			else
-			{
-				// printf("%s\n", date1);
-				char *date2 = strtok(NULL," ");
-				if (date2 == NULL){
-					printf("you have to give two dates\n");
-					ptotal++;
-    				pfail++;
-					continue;
-				}
-				else {
-					// date idate1, idate2;
-					// if (charToDate(date1, &idate1) != 0 || charToDate(date2, &idate2) != 0 || earlier(&idate2, &idate1) == 1)
-					// {
-					// 	printf("wrong dates\n");
-					// 	continue;
-					// }
-					
-					// topk(countryHashTable, countryHashNum, k, country, 2, idate1, idate2);
-				}
-			}
-
-			ptotal++;
-			psuccess++;
-
-/*4*/	} else if (strncmp(command, "/searchPatientRecord", strlen("/searchPatientRecord")) == 0 || strncmp(command, "spr", strlen("spr")) == 0) {
-			// printf("searchPatientRecord\n");
-			char *send_line = malloc((strlen(command) + 1) * sizeof(char));
-			strcpy(send_line, command);
-			char *recordID = strtok(command," ");
-			int flag = 0;
-			// char *exitDate;
-			recordID = strtok(NULL, " ");
-			if (recordID == NULL){
-				printf("no recordID given\n");
-				free(recordID);
-				ptotal++;
-    			pfail++;
-    			free(send_line);
-				continue;
-			}
-			write_line(list_head, pids, numWorkers, fifosR, fifosW, send_line, flag);
-
-			int counter = 0;
-			for (int i = 0; i < numWorkers; i++) //read from all workers
-			{
-				
-				int size = 0; 
-				while (read(fifosR[i], &size, sizeof(int)) < 0){ 
-			   		// if (errno == EAGAIN) { 
-				    //     printf("(pipe empty)\n"); 
-				    //     sleep(1);
-				    //     // break; 
-				    // }
-				    // printf("PAMELIGO\n");
-				}
-
-				if (size == 0)
-				{	
-					counter++;
-					continue;
-				}
-
-				char *buffer = malloc(sizeof(char) * (size + 1));
-				while (read(fifosR[i], buffer, size) < 0){ 
-			   		// if (errno == EAGAIN) { 
-				    //     printf("(pipe empty)\n"); 
-				    //     sleep(1);
-				    //     // break; 
-				    // }
-				    // printf("PAMELIGO\n");
-				}
-				buffer[size] = '\0';
-				printf("%s\n", buffer);
-			
-
-				free(buffer);
-
-			}
-
-			if (counter == numWorkers)
-			{
-				printf("recordID not found\n");
-			}
-
-			ptotal++;
-			psuccess++;
-			free(send_line);
-
-/*5*/	} else if (strncmp(command, "/numPatientAdmissions", strlen("/numPatientAdmissions")) == 0 || strncmp(command, "npa", strlen("npa")) == 0) {
-			// printf("/numPatientAdmissions\n");
-			char *send_line = malloc((strlen(command) + 1) * sizeof(char));
-			strcpy(send_line, command);
-			char *token = strtok(command," ");
-			int flag = 0;
-
-			if (token == NULL) continue;
-    		// printf("%s\n", token);
-    		char *virusName = strtok(NULL, " ");
-    		if (virusName == NULL) {
-    			printf("Usage: /numPatientAdmissions disease date1 date2 [country] \n");
-    			ptotal++;
-    			pfail++;
-    			free(send_line);
-    			continue;
-			}// printf("%s\n", virusName);
-
-			char *date1 = strtok(NULL," ");
-			if (date1 == NULL){
-				printf("Usage: /numPatientAdmissions disease date1 date2 [country] \n");
-				ptotal++;
-    			pfail++;
-    			free(send_line);
-				continue;
-			}
-
-			char *date2 = strtok(NULL," ");
-			if (date2 == NULL){
-				printf("Usage: /numPatientAdmissions disease date1 date2 [country] \n");
-				ptotal++;
-    			pfail++;
-    			free(send_line);
-				continue;
-			}
-
-			char *country = strtok(NULL," ");
-			if (country == NULL)
-			{
-				// printf("no country \n");
-				// frequency(diseaseHashTable, diseaseHashNum, date1, date2, virusName);
-				write_line(list_head, pids, numWorkers, fifosR, fifosW, send_line, flag);
-				read_answer_string(list_head, pids, numWorkers, fifosR, fifosW, send_line, flag);
-				
-			}
-			else
-			{
-				flag = 1;
-				// printf("country: %s\n", country);
-				// frequencyWithCountry(countryHashTable, countryHashNum, date1, date2, virusName, country);
-				write_line(list_head, pids, numWorkers, fifosR, fifosW, send_line, flag);
-				read_answer_string(list_head, pids, numWorkers, fifosR, fifosW, send_line, flag);
-
-			}
-
-			ptotal++;
-			psuccess++;
-			free(send_line);
-
-/*6*/	} else if (strncmp(command, "/numPatientDischarges", strlen("/numPatientDischarges")) == 0 || strncmp(command, "npd", strlen("npd")) == 0) {
-			// printf("/numPatientDischarges\n");
-			char *send_line = malloc((strlen(command) + 1) * sizeof(char));
-			strcpy(send_line, command);
-			char *token = strtok(command," ");
-			int flag = 0;
-			if (token == NULL) continue;
-    		// printf("%s\n", token);
-    		char *disease = strtok(NULL, " ");
-    		if (disease == NULL) {
-    			printf("Usage: /numPatientDischarges disease date1 date2 [country] \n");
-    			ptotal++;
-    			pfail++;
-    			continue;
-    			free(send_line);
-			}// printf("%s\n", disease);
-
-			char *date1 = strtok(NULL," ");
-			if (date1 == NULL){
-				printf("Usage: /numPatientDischarges disease date1 date2 [country] \n");
-				ptotal++;
-    			pfail++;
-				continue;
-				free(send_line);
-			}
-
-			char *date2 = strtok(NULL," ");
-			if (date2 == NULL){
-				printf("Usage: /numPatientDischarges disease date1 date2 [country] \n");
-				ptotal++;
-    			pfail++;
-				continue;
-				free(send_line);
-			}
-
-			char *country = strtok(NULL," ");
-			if (country == NULL)
-			{
-				// printf("no country \n");
-				// frequency(diseaseHashTable, diseaseHashNum, date1, date2, disease);
-				write_line(list_head, pids, numWorkers, fifosR, fifosW, send_line, flag);
-				read_answer_string(list_head, pids, numWorkers, fifosR, fifosW, send_line, flag);
-
-			}
-			else
-			{
-				flag = 1;
-				// printf("country: %s\n", country);
-				// frequencyWithCountry(countryHashTable, countryHashNum, date1, date2, disease, country);
-				write_line(list_head, pids, numWorkers, fifosR, fifosW, send_line, flag);
-				read_answer_string(list_head, pids, numWorkers, fifosR, fifosW, send_line, flag);
-
-			}	
-			
-			ptotal++;
-			psuccess++;
-			free(send_line);
-
-		} else if (strcmp(command, "/exit\0") != 0){
-			printf("Wrong command try again\n");
-			ptotal++;
-			pfail++;
-		}
-		// printf("FLAG PRIN WHILE %d\n", pflag);
-
-
-	} while(strcmp(command, "/exit\0")!= 0 && pflag != 1 );
-	printf("exiting\n");
-	if (command != NULL)
-		free(command);
-
-	for (int i = 0; i < numWorkers; i++)
-	{
-		kill(pids[i], SIGKILL);
-	}
 }
 
 
@@ -638,8 +588,9 @@ void perror_exit(char *message)
 
 void connecttoserver(char* serveraddress, int port, char* command){
 
-	char buf[1256];
-	int sock,length;
+	// char buf[1000000];
+	int sock;
+	// int length;
     struct sockaddr_in server;
     struct sockaddr *serverptr = (struct sockaddr*)&server;
     struct hostent *rem;
@@ -661,13 +612,52 @@ void connecttoserver(char* serveraddress, int port, char* command){
 	//printf("Connecting to %s port %d\n", argv[1], port);
 	if(write(sock, command, strlen(command)) < 0)
 		perror_exit("write");
-    if ((length=read(sock, buf, 1256)) < 0)
-    	perror_exit("read");    
+    // if ((length=read(sock, buf, 1256)) < 0)
+    // 	perror_exit("read");    
     	   	
- 	buf[length]=0;
-	// printf("%ssdfgdsfgdfgsdf\n",buf);close(sock); 
+ 	// buf[length]=0;
+	//close(sock); 
 
 
+}
+
+
+
+char *connectToServerWithResponse(char* serveraddress, int port, char* command){
+
+	char *buf = malloc(sizeof(char) * 500);
+	int sock;
+	int length;
+    struct sockaddr_in server;
+    struct sockaddr *serverptr = (struct sockaddr*)&server;
+    struct hostent *rem;
+
+
+	/* Create socket */
+    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+    	perror_exit("socket");
+	/* Find server address */
+    if ((rem = gethostbyname(serveraddress)) == NULL) {	
+	   herror("gethostbyname"); exit(1);
+    }
+
+    server.sin_family = AF_INET;       /* Internet domain */
+    memcpy(&server.sin_addr, rem->h_addr, rem->h_length);
+    server.sin_port = htons(port);         /* Server port */
+	if (connect(sock, serverptr, sizeof(server)) < 0)
+   		perror_exit("connect");
+	//printf("Connecting to %s port %d\n", argv[1], port);
+	if(write(sock, command, strlen(command)) < 0)
+		perror_exit("write");
+    if ((length=read(sock, buf, 500)) < 0)
+    	perror_exit("read");
+    	
+    // printf("%s\n", buf);
+
+ 	// buf[length]=0;
+	close(sock); 
+
+	return buf;
 }
 
 
@@ -721,27 +711,6 @@ char * write_stats(bucket **HashTable,  int HashNum, char *date, char *country, 
 	}
 
 	
-	//write to fifoW
-	// printf("%s\n", string);
-	// int size = (int) strlen(string) + 1;
-	// // printf("STRLEN STRING %d\n", (int) strlen(string));
-	// if (write(fifosW, &size, sizeof(int)) == -1){ 
-	// 	perror("write");
-	// 	// return -1;
-	// }
-
-
-	// // printf("STRLEN STRING %d\n", (int) strlen(string));
-	// if (write(fifosW, string, size) == -1){ 
-	// 	perror("write");
-	// 	// return -1;
-	// }
-
-	// connecttoserver(serveraddress, port, string);
-
-
-	// strcpy(string, " ");
-
 
 	//reset counters to 0
 	for (int i = 0; i < HashNum; i++)
@@ -1070,9 +1039,9 @@ void worker_response(char *buffer, bucket **diseaseHashTable, int diseaseHashNum
 		list_node *ret = search(head, recordID);
 		if (ret == NULL)
 		{
-			// printf("not found\n");
-			int zero = 0;
-			if (write(fifosW, &zero, sizeof(int)) == -1){ 
+			printf("not found\n");
+
+			if (write(fifosW, "Not found", 500) == -1){ 
 				perror("write");
 				// return -1;
 			}
@@ -1102,15 +1071,8 @@ void worker_response(char *buffer, bucket **diseaseHashTable, int diseaseHashNum
 
 		// printf("result is %s\n", result);
 	
-		
-		int size = (int) strlen(result) + 1;
-		if (write(fifosW, &size, sizeof(int)) == -1){ 
-			perror("write");
-			// return -1;
-		}
 
-
-		if (write(fifosW, result, size) == -1){ 
+		if (write(fifosW, result, 500) == -1){ 
 			perror("write");
 			// return -1;
 		}
@@ -1131,6 +1093,7 @@ void worker_response(char *buffer, bucket **diseaseHashTable, int diseaseHashNum
 		{
 			// printf("no country \n");
 			paths_list_node * cur = path_head;
+			char response[500];
 			while(cur != NULL){
 				char tmp[30];
 				strcpy(tmp, cur->path);
@@ -1138,12 +1101,16 @@ void worker_response(char *buffer, bucket **diseaseHashTable, int diseaseHashNum
 				country = strtok(NULL," ");
 				// char *country = path_head->path;
 				// printf("COUNTRY numPatientAdmissions-- %s\n", country);
-				frequencyWithCountryNPAD(countryHashTable, countryHashNum, date1, date2, virusName, country, fifosW, path_head, flag);
+				char *resp = frequencyWithCountryNPAD(countryHashTable, countryHashNum, date1, date2, virusName, country, fifosW, path_head, flag);
+				sprintf(response, "%s%s", response, resp);
+
+				free(resp);
 				cur = cur->next;
 			}
 			
-			int size = -13;
-			if (write(fifosW, &size, sizeof(int)) == -1){ 
+			// int size = -13;
+			printf("worker: %s\n", response);
+			if (write(fifosW, "response", 500) == -1){ 
 				perror("write");
 				// return -1;
 			}
@@ -1152,8 +1119,13 @@ void worker_response(char *buffer, bucket **diseaseHashTable, int diseaseHashNum
 		{
 
 			// printf("country: %s\n", country);
-			frequencyWithCountryNPAD(countryHashTable, countryHashNum, date1, date2, virusName, country, fifosW, path_head, flag);
-
+			char *response = frequencyWithCountryNPAD(countryHashTable, countryHashNum, date1, date2, virusName, country, fifosW, path_head, flag);
+			printf("worker: %s\n", response);
+			if (write(fifosW, "response", 500) == -1){ 
+				perror("write");
+				// return -1;
+			}
+			free(response);
 		}
 
 	} else if (strncmp(command, "/numPatientDischarges", strlen("/numPatientDischarges")) == 0 || strncmp(command, "npd", strlen("npd")) == 0) {

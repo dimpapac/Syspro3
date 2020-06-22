@@ -26,12 +26,20 @@ extern int ptotal;
 extern int psuccess;
 extern int pfail;
 
+int numWorkers;
+int *pids;
+
+
 void handler(int sig){
 	// signal(SIGINT, handler);
 	// signal(SIGQUIT, handler);
 	// printf("diseaseAggregator: I have received a sigint/sigquit\n");
 	pflag = 1;
 	// printf("flag in handler %d\n", pflag);
+	for (int i = 0; i < numWorkers; i++)
+	{
+		kill(pids[i], SIGKILL);
+	}
 }
 
 
@@ -53,7 +61,7 @@ int main(int argc, char *argv[])
 	}
 
 	// struct dirent *dir;  // Pointer for directory entry
-	int bufferSize, numWorkers, serverPort;
+	int bufferSize, serverPort;
 	char *input_dir, *serverIP;
 	int flags = 5;
 	for (int i = 1; i < argc; i+=2)
@@ -105,7 +113,7 @@ int main(int argc, char *argv[])
 		list_head[i] = NULL;
 
 
-	int *pids;
+	// int *pids;
 	pids = malloc(sizeof(int) * numWorkers); // pids of children
 	// int fifos[numWorkers];
 	int *fifosR= malloc(sizeof(int) * numWorkers);
@@ -295,8 +303,7 @@ int main(int argc, char *argv[])
 	/*non-blocking pipe*/
 
 
-    cli(list_head, pids, numWorkers, fifosR, fifosW);
-
+    // cli(list_head, pids, numWorkers, fifosR, fifosW);
 
 	// printf("unlink of diseaseAggregator\n");
 	for (int i = 0; i < numWorkers; i++){
@@ -311,26 +318,28 @@ int main(int argc, char *argv[])
 		}	
 	}
 	
-	char *logfile = malloc(sizeof(char) * (strlen("log_file.") + 10));
+	// getchar();
+	while(pflag==0);
+	// char *logfile = malloc(sizeof(char) * (strlen("log_file.") + 10));
 
-	sprintf(logfile, "log_file.%d", getpid());
-	FILE * fp;
-	fp = fopen(logfile, "w");
-	for (int i = 0; i < numWorkers; i++)
-	{
-		paths_list_node *cur = list_head[i];
-		while(cur != NULL){
-			// printf("%s\n", cur->path);
-			fprintf(fp, "%s\n", cur->path);
-			cur = cur->next;
-		}
-	}
+	// sprintf(logfile, "log_file.%d", getpid());
+	// FILE * fp;
+	// fp = fopen(logfile, "w");
+	// for (int i = 0; i < numWorkers; i++)
+	// {
+	// 	paths_list_node *cur = list_head[i];
+	// 	while(cur != NULL){
+	// 		// printf("%s\n", cur->path);
+	// 		fprintf(fp, "%s\n", cur->path);
+	// 		cur = cur->next;
+	// 	}
+	// }
 
-	fprintf(fp, "TOTAL %d\n", ptotal);
-	fprintf(fp, "SUCCESS %d\n", psuccess);
-	fprintf(fp, "FAIL %d\n", pfail);
+	// fprintf(fp, "TOTAL %d\n", ptotal);
+	// fprintf(fp, "SUCCESS %d\n", psuccess);
+	// fprintf(fp, "FAIL %d\n", pfail);
 
-   	fclose(fp);
+ //   	fclose(fp);
 
    	for (int i = 0; i < numWorkers; i++)
    	{
@@ -346,7 +355,7 @@ int main(int argc, char *argv[])
    	free(list_head);
    	free(fifosR);
    	free(fifosW);
-	free(logfile);
-	printf("diseaseAggregator exiting...\n");
+	// free(logfile);
+	// printf("master exiting...\n");
 	return 0;	
 }

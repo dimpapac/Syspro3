@@ -45,7 +45,7 @@ int numberOfOutbreaks2dates1country(rb_node *root, date date1, date date2, char 
 void frequency(bucket **HashTable, int HashNum, char *date1, char *date2, char *virusName, int fifosW);
 
 void frequencyWithCountry(bucket **HashTable, int HashNum, char *date1, char *date2, char *virusName, char *country, int fifosW);
-void frequencyWithCountryNPAD(bucket **HashTable, int HashNum, char *date1, char *date2, char *virusName, char *country, int fifosW, paths_list_node * path_head, int flag);
+char *frequencyWithCountryNPAD(bucket **HashTable, int HashNum, char *date1, char *date2, char *virusName, char *country, int fifosW, paths_list_node * path_head, int flag);
 
 
 int numberOfPatients(rb_node *root, char *disease);

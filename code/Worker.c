@@ -60,7 +60,7 @@ void handler(){
 
    	fclose(fp);
 
-	// exit(1);
+	exit(1);
 }
 
 
@@ -76,8 +76,8 @@ int main(int argc, char *argv[])
 	// printf("argv4 %s\n", argv[4]);
 	// printf("BUFFER SIZE IS %d\n", bufferSize);
 
-	signal(SIGINT, handler);
-	signal(SIGQUIT, handler);
+	// signal(SIGINT, handler);
+	// signal(SIGQUIT, handler);
 	ctotal = 0;
 	csuccess = 0;
 	cfail = 0;
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
 
 	list_node *head = NULL; // head of list 
 
-	int bytesread = 0;
+	// int bytesread = 0;
 
 
 	int size = 0;
@@ -137,7 +137,8 @@ int main(int argc, char *argv[])
 	    {
 	    	continue;
 	    }
-		bytesread = read(fifosR, buffer, size);
+		// bytesread = read(fifosR, buffer, size);
+		read(fifosR, buffer, size);
 		// printf("bytesread %d\n", bytesread);
 	   
 	    buffer[size] = '\0';
@@ -160,11 +161,12 @@ int main(int argc, char *argv[])
 	read(fifosR, &size, sizeof(int));
   	// printf("retVal %d\n", retVal);
 	serverIP = malloc(size * sizeof(char) + 1);
-	bytesread = read(fifosR, serverIP, size);
+	// bytesread = read(fifosR, serverIP, size);
+	read(fifosR, serverIP, size);
 	// printf("bytesread %d\n", bytesread);
     serverIP[size] = '\0';
    	read(fifosR, &serverPort, sizeof(int));
-    printf("Received: %s --- %d ----  bytesread: %d\n", serverIP, serverPort, bytesread);
+    // printf("Received: %s --- %d ----  bytesread: %d\n", serverIP, serverPort, bytesread);
 
 
     //listening port 
@@ -243,75 +245,24 @@ int main(int argc, char *argv[])
 
 
     	printf("Accepted connection from %s\n", s);
-	// print_worker_list(worker_info_head);
 
-    	// Client_info toread = obtain();
-    	// printf("from obtain %d %s\n", toread.fd, toread.IP);
-    	// // print_pool();
+        char buff[500];
+        memset(buff, 0, sizeof(buff));
+        read(newsock, buff, 500);
 
-     //    char buff[1000000];
-     //    memset(buff, 0, sizeof(buff));
-     //    read(toread.fd, buff, 1000000);
-
-     //    printf("%s\n", buff);
-
-    	// close(newsock); /* parent closes socket to client */
-    	// consumer();
+        printf("%s\n", buff);
+        worker_response(buff, diseaseHashTable, diseaseHashNum, countryHashTable, countryHashNum, head, path_head, newsock);
+    	// close(newsock); 
     }
 
 
-	//write -15 indication that i finished with stats
- // 	int end = -15;
-	// if (write(fifosW, &end, sizeof(int)) == -1){ 
-	// 	perror("write");
-	// 	// return -1;
-	// }
 
-
-    // printf("Received: %s  ----  bytesread: %d -----pid: %d\n", buffer, bytesread, getpid());
 
 
 
 
 	/* blocking pipe*/
 
-
-
-	/* blocking pipe*/
-	while(1){
-		// printf("PRIN\n");
-	  	int retVal = read(fifosR, &size, sizeof(int));
-		// printf("META\n");
-	  	// printf("retVal %d\n", retVal);
-	    if (retVal == -1)
-	    {
-	    	// continue;
-	    }
-		bytesread = read(fifosR, buffer, size);
-		if (bytesread == -1)
-		{
-			// continue;
-		}
-		// printf("bytesread %d\n", bytesread);
-	   
-	    buffer[size] = '\0';
-	    // printf("Received: %s  ----  bytesread: %d\n", buffer, bytesread);
-	    // sleep(3);
-	    // if (strcmp(buffer, "EOM") == 0)
-	    // {
-	    // 	printf("EOM Received\n");
-	    // 	// break;
-	    // }
-	    // printf("Received: %s  ----  bytesread: %d -----pid: %d\n", buffer, bytesread, getpid());
-
-			// sleep(1);
-
-	    worker_response(buffer, diseaseHashTable, diseaseHashNum, countryHashTable, countryHashNum, head, path_head, fifosW);
-
-	}
-
-
-	
 
     // print_list(head);
    	// print_ranges(diseaseHashTable, diseaseHashNum);

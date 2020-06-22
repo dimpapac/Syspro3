@@ -7,7 +7,7 @@ JEXEC	= whoClient
 OBJS	= master.o functions1.o heap.o rbt.o list.o functions.o
 COBJS	= Worker.o functions1.o heap.o rbt.o list.o functions.o
 QOBJS	= whoServer.o functions1.o heap.o rbt.o list.o functions.o
-JOBBS	= whoClient.c functions1.o heap.o rbt.o list.o functions.o
+JOBJS	= whoClient.o functions1.o heap.o rbt.o list.o functions.o
 LDFLAGS = -lpthread
 
 .PHONY : all clean run

@@ -896,7 +896,7 @@ void frequencyWithCountry(bucket **HashTable, int HashNum, char *date1, char *da
 
 
 //find the red black tree  and pass it to numberOfOutbreaks2dates1country
-void frequencyWithCountryNPAD(bucket **HashTable, int HashNum, char *date1, char *date2, char *virusName, char *country, int fifosW, paths_list_node * path_head, int flag){
+char  *frequencyWithCountryNPAD(bucket **HashTable, int HashNum, char *date1, char *date2, char *virusName, char *country, int fifosW, paths_list_node * path_head, int flag){
 	date idate1, idate2;
 	char dat1[10];
 	char dat2[10];
@@ -907,13 +907,15 @@ void frequencyWithCountryNPAD(bucket **HashTable, int HashNum, char *date1, char
 	if (charToDate(dat1, &idate1) != 0 || charToDate(dat2, &idate2) != 0 || earlier(&idate2, &idate1) == 1)
 	{
 		printf("wrong dates frequencyWithCountryNPAD\n");
-		return;
+		return NULL;
 	}
 
 	int hashValue = hash2(country, HashNum);
 
-	if (HashTable[hashValue] == NULL)
-		return;
+	if (HashTable[hashValue] == NULL){
+		// printf("HashTable[hashValue] == NULL\n");
+		return NULL;
+	}
 
 	for (int j = 0; j < HashTable[hashValue]->currentNumberOfEntries; j++)
 	{
@@ -931,22 +933,16 @@ void frequencyWithCountryNPAD(bucket **HashTable, int HashNum, char *date1, char
 	 		{
 	 			sendValue = numberOfOutbreaks2dates1countryExitDate(HashTable[hashValue]->entries[j].root, idate1, idate2, country, virusName);
 	 		}
-	 		char buffer[100];
+	 		char *buffer = malloc(sizeof(char)*100);
 	 		sprintf(buffer, "%s %d", country, sendValue);
 	 		// printf("BUFFER IN frequencyWithCountryNPAD-- %s\n", buffer);
 	 		
-	 		int size = (int) strlen(buffer) + 1;
-			if (write(fifosW, &size, sizeof(int)) == -1){ 
-				perror("write");
-				// return -1;
-			} 
-
-			if (write(fifosW, buffer, size) == -1){ 
-				perror("write");
-				// return -1;
-			} 
-
-	 		return;
+			// if (write(fifosW, buffer, 500) == -1){ 
+			// 	perror("write");
+			// 	// return -1;
+			// } 
+	 		printf("functions1 %s\n", buffer);
+	 		return buffer;
 	 	}
 	} 
 	bucket * last_bucket = HashTable[hashValue]->next;
@@ -968,22 +964,17 @@ void frequencyWithCountryNPAD(bucket **HashTable, int HashNum, char *date1, char
 	 				sendValue = numberOfOutbreaks2dates1countryExitDate(last_bucket->entries[k].root, idate1, idate2, country, virusName);
 	 			}
 
-				char buffer[100];
+	 			char *buffer = malloc(sizeof(char)*100);
 		 		sprintf(buffer, "%s %d", country, sendValue);
 	 			// printf("BUFFER IN frequencyWithCountryNPAD-- %s\n", buffer);
 		 		
-		 		int size = (int) strlen(buffer) + 1;
-				if (write(fifosW, &size, sizeof(int)) == -1){ 
-					perror("write");
-					// return -1;
-				} 
 
-				if (write(fifosW, buffer, size) == -1){ 
-					perror("write");
-					// return -1;
-				} 
-
-	 			return;
+				// if (write(fifosW, buffer, 500) == -1){ 
+				// 	perror("write");
+				// 	// return -1;
+				// } 
+	 			printf("functions1 %s\n", buffer);
+	 			return buffer;
 	 		}
 		}
 		last_bucket = last_bucket->next; 
@@ -991,12 +982,13 @@ void frequencyWithCountryNPAD(bucket **HashTable, int HashNum, char *date1, char
 
 	printf("No outbreaks found\n");
 
-	int zero = 0;
-	if (write(fifosW, &zero, sizeof(int)) == -1){ 
-		perror("write");
-		// return -1;
-	}
-		
+	// if (write(fifosW, "0", 500) == -1){ 
+	// 	perror("write");
+	// 	// return -1;
+	// }
+	char *buffer = malloc(sizeof(char)*100);
+	sprintf(buffer, "0");
+	return buffer;
 
 }
 

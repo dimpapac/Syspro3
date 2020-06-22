@@ -34,11 +34,6 @@
 #define MAX_BUF 1000000
 #define MAX_FD 2 
 
-// void perror_exit(char *message) {
-//     perror(message);
-//     exit(EXIT_FAILURE);
-// }
-
 int bufferSize;
 int num_of_items = 15;
 
@@ -101,22 +96,11 @@ Client_info obtain() {
 	return client_info;
 }
 
-// void * producer(void * ptr)
-// {
-// 	while (num_of_items > 0) {
-// 		place(&pool, num_of_items);
-// 		printf("producer: %d\n", num_of_items);
-// 		num_of_items--;
-// 		pthread_cond_signal(&cond_nonempty);
-// 		usleep(1000);
-// 		}
-// 	pthread_exit(0);
-// }
 
+void handle_client(char *buffer, int fd){
 
-void handle_worker(char *buffer){
-
-	printf("buffer in handle_worker %s\n", buffer);
+	printf("%s\n", buffer);
+    send_request(worker_info_head, fd, buffer);
 }
 
 void * consumer() //thread function
@@ -124,18 +108,13 @@ void * consumer() //thread function
 	Client_info client_info;
 	while(1){
 		client_info = obtain();
-		// Client_info toread = obtain();
-    	// printf("from obtain %d %s\n", toread.fd, toread.IP);
-    	// print_pool();
         char buff[MAX_BUF];
         memset(buff, 0, sizeof(buff));
         read(client_info.fd, buff, MAX_BUF);
-        //strtok buff --> w/c@port$stats#country#country#country
+        //strtok buff --> w@port$stats#country#country#country
         char *token = strtok(buff, "@");
         if (strcmp(token,"w") == 0 )
         {
-        	// handle_worker(buff);
-
         	char *port_s = strtok(NULL, "$");
         	int port = atoi(port_s);
         	char *stats = strtok(NULL, "#");
@@ -167,26 +146,24 @@ void * consumer() //thread function
 
         	for (int i = 0; i < countriesCounter; ++i)
         	{
-        		printf("%s\n", countries[i]);
+        		// printf("%s\n", countries[i]);
         	}
 
 	        pthread_mutex_lock(&list_mtx); //lock for global list and print 
-        	// printf("%s\n", stats);
+        	printf("%s\n", stats);
 	        append_worker_list(&worker_info_head, client_info.IP, port, countriesCounter, countries);
 	        // printf("thread id: %ld\n", pthread_self() );
 	        pthread_mutex_unlock(&list_mtx); //unlock
-        	print_worker_list(worker_info_head);
+        	// print_worker_list(worker_info_head);
         }
         else
         {
-        	//handle_client()
+        	// buff[MAX_BUF-1] = '\0';
+        	handle_client(token, client_info.fd);
 
         }
 
-
-
     	close(client_info.fd); /* server closes socket to client */
-
 
 	}
 }
@@ -281,8 +258,6 @@ int main(int argc, char *argv[])
     struct sockaddr *clientptr=(struct sockaddr *)&client;
     //struct hostent *rem;
    
-    // port = statisticsPortNum;
-    // port2 = queryPortNum;
 
     /* Create socket */
     if ((stats_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0 || (query_sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
@@ -300,10 +275,10 @@ int main(int argc, char *argv[])
     if (bind(query_sock, serverptr, sizeof(server)) < 0)
         perror_exit("bind");
 
-    getsockname(stats_sock, (struct sockaddr *)&server, &clientlen); // pairnei ti proti diathesimi port apo to sistima kai ti vazei sto server
+    getsockname(stats_sock, (struct sockaddr *)&server, &clientlen); 
     statisticsPortNum = ntohs(server.sin_port);
 
-    getsockname(query_sock, (struct sockaddr *)&server, &clientlen); // pairnei ti proti diathesimi port apo to sistima kai ti vazei sto server
+    getsockname(query_sock, (struct sockaddr *)&server, &clientlen); 
     queryPortNum = ntohs(server.sin_port);
     /* Listen for connections */
     if (listen(stats_sock, 15) < 0) perror_exit("listen");
@@ -329,7 +304,6 @@ int main(int argc, char *argv[])
 	        }
 
 	        poll(pollfds, MAX_FD, -1);
-	        //printf("Infinite\n");
 	        for (int i = 0; i < MAX_FD; i++)
 	        {                
 	            if((pollfds[i].revents & POLLIN))
@@ -358,27 +332,6 @@ int main(int argc, char *argv[])
 	        }        	
     	}
     }
-
-
-
-  //   while (1) {
-  //       /* accept connection */
-  //   	if ((newsock = accept(stats_sock, clientptr, &clientlen)) < 0) perror_exit("accept");
-
-  //   	// convert to client ip
-		// struct sockaddr_in *addr_in = (struct sockaddr_in *)clientptr;
-		// char *s = inet_ntoa(addr_in->sin_addr);
-
-  //   	client_info.fd = newsock;
-  //   	client_info.IP = malloc(sizeof(char)* (strlen(s) + 1));
-  //   	strcpy(client_info.IP, s);
-  //   	place(client_info);
-  //   	// print_pool();
-
-  //   	printf("Accepted connection from %s\n", s);
-		// // print_worker_list(worker_info_head);
-
-  //   }
 
 
 

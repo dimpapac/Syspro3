@@ -24,14 +24,33 @@
 
 #include "structs.h"
 #include "functions.h"
+#include "functions1.h"
 #include "list.h"
-// #include "rbt.h"
-// #include "heap.h"
+#include "rbt.h"
+#include "heap.h"
 
 #include "whoServer.h"
 
+int flag;
+char *servIP;
+int servPort;
+//mutex and condition variable
+pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mtx_print = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t cond_var = PTHREAD_COND_INITIALIZER;
 
+void *send_line(void *line){
+	pthread_mutex_lock(&mtx);
+	while(flag == 0){
+		pthread_cond_wait(&cond_var, &mtx);
+	}
+	pthread_mutex_unlock(&mtx);
 
+	char * ret = connectToServerWithResponse(servIP, servPort, (char *)line);
+	printf("%s\n", ret);
+	free(ret);
+	return NULL;
+}
 
 int main(int argc, char *argv[])
 {
@@ -43,8 +62,8 @@ int main(int argc, char *argv[])
 	}
 
 	FILE *queryFile;
-	int numThreads, servPort;
-	char *servIP, *queryFileName;
+	int numThreads;
+	char *queryFileName;
 	int flags = 4;
 	for (int i = 1; i < argc; i+=2)
 	{
@@ -78,9 +97,9 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 
-	printf("%s %d %d %s\n", queryFileName, numThreads, servPort, servIP);
+	// printf("%s %d %d %s\n", queryFileName, numThreads, servPort, servIP);
 
-	
+	flag = 0;
 
     char * line = NULL;
     size_t len = 0;
@@ -91,19 +110,49 @@ int main(int argc, char *argv[])
 		perror("Error opening file\n");
 	}
 
-    while ((read = getline(&line, &len, queryFile)) != -1) {
-        // printf("Retrieved line of length %zu:\n", read);
-        printf("%s", line);
+	int numoflines = 0;
+	//count queries 
+	while ((read = getline(&line, &len, queryFile)) != -1) {
+		numoflines++;
+		free(line);
+		line = NULL;
     }
-    printf("\n");
-    fclose(queryFile);
+	free(line);
+    line = NULL;
+
+    rewind(queryFile);
+    // printf("numoflines %d\n", numoflines);
+    char **queries = malloc(sizeof(char*) * numoflines);
+
+    int i = 0;
+    while ((read = getline(&line, &len, queryFile)) != -1) {
+    	queries[i] = malloc(sizeof(char)* (strlen(line) +1));
+    	strcpy(queries[i], line);
+		i++;
+    }
+
     if (line)
         free(line);
+    fclose(queryFile);
 
 
+   	pthread_t thr[numoflines]; 
+	int err;
+	for (int i = 0; i < numoflines; i++)
+	{
+		if ((err = pthread_create(&thr[i], NULL, send_line, queries[i]))) { /* New thread */
+			perror("pthread_create");
+			exit(1); 
+		}
+	}
 
-	//pthrad_create
-	//pthread_join
+	flag = 1;
+	pthread_cond_broadcast(&cond_var);
+
+	for (int i = 0; i < numoflines; ++i)
+	{
+		pthread_join(thr[i], NULL);
+	}
 
 
 	return 0;
